@@ -1,113 +1,238 @@
 package dev.rachamon.rachamonpixelmonshowdown;
 
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import dev.rachamon.api.sponge.command.SpongeCommandService;
+import dev.rachamon.api.sponge.config.SpongeAPIConfigFactory;
+import dev.rachamon.api.sponge.implement.plugin.IRachamonPlugin;
+import dev.rachamon.api.sponge.implement.plugin.IRachamonPluginManager;
+import dev.rachamon.api.sponge.provider.RachamonSpongePluginProvider;
+import dev.rachamon.rachamonpixelmonshowdown.configs.BattleLeagueConfig;
+import dev.rachamon.rachamonpixelmonshowdown.configs.LanguageConfig;
+import dev.rachamon.rachamonpixelmonshowdown.configs.MainConfig;
+import dev.rachamon.rachamonpixelmonshowdown.managers.battle.RachamonPixelmonShowdownBattleManager;
+import dev.rachamon.rachamonpixelmonshowdown.managers.plugins.RachamonPixelmonShowdownPluginManager;
+import ninja.leaping.configurate.objectmapping.GuiceObjectMapperFactory;
+import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
+import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
+import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.plugin.Dependency;
+import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 
-@Mod(
-        modid = RachamonPixelmonShowdown.MOD_ID,
-        name = RachamonPixelmonShowdown.MOD_NAME,
-        version = RachamonPixelmonShowdown.VERSION
-)
-public class RachamonPixelmonShowdown {
+import java.nio.file.Path;
 
-    public static final String MOD_ID = "rachamonpixelmonshowdown";
-    public static final String MOD_NAME = "RachamonPixelmonShowdown";
-    public static final String VERSION = "0.0.1-SNAPSHOT";
+@Plugin(id = "rachamonpixelmonshowdown", name = RachamonPixelmonShowdown.PLUGIN_NAME, dependencies = {@Dependency(id = "after:pixelmon")})
+public class RachamonPixelmonShowdown extends RachamonSpongePluginProvider implements IRachamonPlugin {
 
-    /**
-     * This is the instance of your mod as created by Forge. It will never be null.
-     */
-    @Mod.Instance(MOD_ID)
-    public static RachamonPixelmonShowdown INSTANCE;
+    public static final String PLUGIN_NAME = "RachamonPixelmonShowdown";
 
-    /**
-     * This is the first initialization event. Register tile entities here.
-     * The registry events below will have fired prior to entry to this method.
-     */
-    @Mod.EventHandler
-    public void preinit(FMLPreInitializationEvent event) {
+    // injects
+    @Inject
+    private Game game;
+    @Inject
+    private GuiceObjectMapperFactory factory;
+    @Inject
+    private Injector injector;
+    @Inject
+    private Injector pluginInjector;
+    @Inject
+    private PluginContainer container;
+    @Inject
+    @ConfigDir(sharedRoot = false)
+    private Path directory;
 
+    private static RachamonPixelmonShowdown instance;
+    private Components components;
+    private RachamonPixelmonShowdownPluginManager pluginManager;
+    private SpongeAPIConfigFactory<RachamonPixelmonShowdown, MainConfig> config;
+    private SpongeAPIConfigFactory<RachamonPixelmonShowdown, LanguageConfig> language;
+    private SpongeAPIConfigFactory<RachamonPixelmonShowdown, BattleLeagueConfig> league;
+    private boolean isInitialized = false;
+
+    public RachamonPixelmonShowdown() {
+        super(RachamonPixelmonShowdown.PLUGIN_NAME, Sponge.getServer());
+    }
+
+    @Override
+    public GuiceObjectMapperFactory getFactory() {
+        return this.factory;
+    }
+
+    @Override
+    public Game getGame() {
+        return this.game;
+    }
+
+    @Override
+    public Path getDirectory() {
+        return this.directory;
+    }
+
+    @Override
+    public PluginContainer getContainer() {
+        return this.container;
+    }
+
+    @Override
+    public SpongeCommandService getCommandService() {
+        return SpongeCommandService.getInstance();
+    }
+
+    @Override
+    public IRachamonPluginManager getPluginManager() {
+        return this.pluginManager;
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return this.isInitialized;
+    }
+
+    @Override
+    public void setInitialized(boolean isInitialized) {
+        this.isInitialized = isInitialized;
+    }
+
+    @Override
+    public Injector getPluginInjector() {
+        return this.pluginInjector;
+    }
+
+    @Override
+    public Injector getSpongeInjector() {
+        return this.injector;
+    }
+
+    public void setPluginInjector(Injector injector) {
+        this.pluginInjector = injector;
+    }
+
+    public void setComponents(Components components) {
+        this.components = components;
+    }
+
+    public Components getComponents() {
+        return this.components;
+    }
+
+    public static RachamonPixelmonShowdown getInstance() {
+        return RachamonPixelmonShowdown.instance;
     }
 
     /**
-     * This is the second initialization event. Register custom recipes
+     * On pre initialize.
+     *
+     * @param event the event
      */
-    @Mod.EventHandler
-    public void init(FMLInitializationEvent event) {
-
+    @Listener
+    public void onPreInitialize(GamePreInitializationEvent event) {
+        instance = this;
+        this.pluginManager = new RachamonPixelmonShowdownPluginManager();
+        this.getLogger().info("On Pre Initialize RachamonTextureToken...");
     }
 
     /**
-     * This is the final initialization event. Register actions from other mods here
+     * On initialize.
+     *
+     * @param event the event
      */
-    @Mod.EventHandler
-    public void postinit(FMLPostInitializationEvent event) {
-
+    @Listener(order = Order.EARLY)
+    public void onInitialize(GameInitializationEvent event) {
+        RachamonPixelmonShowdown.getInstance().getLogger().info("On Initialize RachamonPixelmonShowdown...");
+        RachamonPixelmonShowdown.getInstance().getPluginManager().initialize();
     }
 
     /**
-     * Forge will automatically look up and bind blocks to the fields in this class
-     * based on their registry name.
+     * On start.
+     *
+     * @param event the event
      */
-    @GameRegistry.ObjectHolder(MOD_ID)
-    public static class Blocks {
-      /*
-          public static final MySpecialBlock mySpecialBlock = null; // placeholder for special block below
-      */
+    @Listener
+    public void onStart(GameStartedServerEvent event) {
+        if (!this.isInitialized()) return;
+        RachamonPixelmonShowdown.getInstance().getLogger().info("On Start RachamonPixelmonShowdown...");
+        RachamonPixelmonShowdown.getInstance().getPluginManager().start();
     }
 
     /**
-     * Forge will automatically look up and bind items to the fields in this class
-     * based on their registry name.
+     * On post initialize.
+     *
+     * @param event the event
      */
-    @GameRegistry.ObjectHolder(MOD_ID)
-    public static class Items {
-      /*
-          public static final ItemBlock mySpecialBlock = null; // itemblock for the block above
-          public static final MySpecialItem mySpecialItem = null; // placeholder for special item below
-      */
+    @Listener
+    public void onPostInitialize(GamePostInitializationEvent event) {
+        RachamonPixelmonShowdown.getInstance().getLogger().info("On Post Initialize RachamonPixelmonShowdown");
+        RachamonPixelmonShowdown.getInstance().getPluginManager().postInitialize();
     }
 
     /**
-     * This is a special class that listens to registry events, to allow creation of mod blocks and items at the proper time.
+     * Gets config.
+     *
+     * @return the config
      */
-    @Mod.EventBusSubscriber
-    public static class ObjectRegistryHandler {
-        /**
-         * Listen for the register event for creating custom items
-         */
-        @SubscribeEvent
-        public static void addItems(RegistryEvent.Register<Item> event) {
-           /*
-             event.getRegistry().register(new ItemBlock(Blocks.myBlock).setRegistryName(MOD_ID, "myBlock"));
-             event.getRegistry().register(new MySpecialItem().setRegistryName(MOD_ID, "mySpecialItem"));
-            */
-        }
-
-        /**
-         * Listen for the register event for creating custom blocks
-         */
-        @SubscribeEvent
-        public static void addBlocks(RegistryEvent.Register<Block> event) {
-           /*
-             event.getRegistry().register(new MySpecialBlock().setRegistryName(MOD_ID, "mySpecialBlock"));
-            */
-        }
-    }
-    /* EXAMPLE ITEM AND BLOCK - you probably want these in separate files
-    public static class MySpecialItem extends Item {
-
+    public SpongeAPIConfigFactory<RachamonPixelmonShowdown, MainConfig> getConfig() {
+        return this.config;
     }
 
-    public static class MySpecialBlock extends Block {
-
+    /**
+     * Sets config.
+     *
+     * @param config the config
+     */
+    public void setConfig(MainConfig config) {
+        this.config.setClazz(config);
     }
-    */
+
+    public void setMainConfig(SpongeAPIConfigFactory<RachamonPixelmonShowdown, MainConfig> config) {
+        this.config = config;
+    }
+
+    public void setBattleLeagueConfig(BattleLeagueConfig league) {
+        this.league.setClazz(league);
+    }
+
+    public void setMainBattleLeagueConfig(SpongeAPIConfigFactory<RachamonPixelmonShowdown, BattleLeagueConfig> league) {
+        this.league = league;
+    }
+
+    public void setMainLanguage(SpongeAPIConfigFactory<RachamonPixelmonShowdown, LanguageConfig> language) {
+        this.language = language;
+    }
+
+    /**
+     * Sets language.
+     *
+     * @param language the language
+     */
+    public void setLanguage(LanguageConfig language) {
+        this.language.setClazz(language);
+    }
+
+    /**
+     * Gets language.
+     *
+     * @return the language
+     */
+    public LanguageConfig getLanguage() {
+        return this.language.getRoot();
+    }
+
+    public BattleLeagueConfig getLeague() {
+        return this.league.getRoot();
+    }
+
+    /**
+     * The type Components.
+     */
+    public static class Components {
+        @Inject
+        private RachamonPixelmonShowdownBattleManager battleManager;
+    }
 }
