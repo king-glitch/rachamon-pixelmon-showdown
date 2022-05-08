@@ -1,0 +1,18 @@
+[
+  {
+    "modid": "rachamonpixelmonshowdown",
+    "name": "RachamonPixelmonShowdown",
+    "description": "Simple Pixelmon Showdown Plugin",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": [
+      "Rachamon"
+    ],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]
