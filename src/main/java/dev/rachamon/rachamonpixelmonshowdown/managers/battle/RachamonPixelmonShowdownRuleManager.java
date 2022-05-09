@@ -1,13 +1,17 @@
 package dev.rachamon.rachamonpixelmonshowdown.managers.battle;
 
+import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 import com.pixelmonmod.pixelmon.battles.rules.BattleRules;
 import com.pixelmonmod.pixelmon.battles.rules.clauses.*;
 import com.pixelmonmod.pixelmon.entities.npcs.registry.PokemonForm;
+import com.pixelmonmod.pixelmon.entities.pixelmon.abilities.AbilityBase;
 import com.pixelmonmod.pixelmon.enums.EnumSpecies;
 import com.pixelmonmod.pixelmon.enums.battle.EnumBattleType;
 import com.pixelmonmod.pixelmon.enums.forms.IEnumForm;
+import com.pixelmonmod.pixelmon.enums.heldItems.EnumHeldItems;
 import dev.rachamon.rachamonpixelmonshowdown.RachamonPixelmonShowdown;
 import dev.rachamon.rachamonpixelmonshowdown.configs.BattleLeagueConfig;
+import dev.rachamon.rachamonpixelmonshowdown.services.QueueService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,14 +21,24 @@ public class RachamonPixelmonShowdownRuleManager {
 
     public final RachamonPixelmonShowdown plugin = RachamonPixelmonShowdown.getInstance();
 
+    private BattleRules battleRules = new BattleRules();
     private final String leagueName;
+    private int complexNum = 0;
     private final List<PokemonClause> pokemonClauses = new ArrayList<>();
     private final List<MoveClause> moveClauses = new ArrayList<>();
     private final List<ItemPreventClause> itemPreventClauses = new ArrayList<>();
     private final List<AbilityClause> abilityClauses = new ArrayList<>();
     private final List<BattleClauseAll> complexClauses = new ArrayList<>();
 
-    public RachamonPixelmonShowdownRuleManager(String leagueName) {
+    public RachamonPixelmonShowdownRuleManager(String leagueName) throws Exception {
+
+        BattleLeagueConfig.League league = this.plugin.getLeague().getLeagues().get(leagueName);
+
+        if (league == null) {
+            this.plugin.getLogger().error("error on build battle rules, " + leagueName);
+            throw new Exception("error on build battle rules, " + leagueName);
+        }
+
         this.leagueName = leagueName;
     }
 
@@ -71,18 +85,186 @@ public class RachamonPixelmonShowdownRuleManager {
         return new PokemonClause(pokemonName, EnumSpecies.getFromNameAnyCase(pokemonName));
     }
 
+    public ItemPreventClause getHeldItemClause(String itemName) {
+        try {
+            if (itemName.equalsIgnoreCase("megastone")) {
+                return new ItemPreventClause(itemName, EnumHeldItems.megaStone);
+            }
+
+            if (itemName.equalsIgnoreCase("z-crystals")) {
+                return new ItemPreventClause(itemName, EnumHeldItems.zCrystal);
+            }
+
+            return new ItemPreventClause(itemName, EnumHeldItems.valueOf(itemName.toLowerCase()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            this.plugin.getLogger().error("Error adding held item " + itemName + " please check config.");
+        }
+
+        return null;
+    }
+
+    public void addComplexClause(BattleLeagueConfig.ComplexClaus claus) {
+
+        ArrayList<BattleClause> complexClause = new ArrayList<>();
+
+        if (claus.getPokemonSpecie() != null) {
+            PokemonClause pokemonClause = this.getPokemonClause(claus.getPokemonSpecie());
+            if (pokemonClause != null) {
+                complexClause.add(pokemonClause);
+            }
+        }
+
+        if (claus.getMoves() != null) {
+            for (String move : claus.getMoves()) {
+                MoveClause moveClause = this.getMoveClause(move);
+                if (moveClause != null) {
+                    complexClause.add(moveClause);
+                }
+            }
+        }
+
+        if (claus.getAbility() != null) {
+            AbilityClause abilityClause = this.getAbilityClause(claus.getAbility());
+            if (abilityClause != null) {
+                complexClause.add(abilityClause);
+            }
+        }
+
+        if (claus.getHeldItem() != null) {
+            ItemPreventClause heldItemClause = this.getHeldItemClause(claus.getHeldItem());
+            if (heldItemClause != null) {
+                complexClause.add(heldItemClause);
+            }
+        }
+
+        BattleClause[] battleClauses = new BattleClause[complexClause.size()];
+
+        battleClauses = complexClause.toArray(battleClauses);
+        BattleClauseSingleAll comboClause = new BattleClauseSingleAll("ComplexClause" + complexNum, battleClauses);
+        complexNum++;
+        complexClauses.add(comboClause);
+    }
+
+    public AbilityClause getAbilityClause(String abilityName) {
+
+        Optional<AbilityBase> abilityBase = AbilityBase.getAbility(abilityName);
+
+        if (!abilityBase.isPresent()) {
+            this.plugin.getLogger().error("Error adding Ability " + abilityName + ". please check config.");
+            return null;
+        }
+
+        return new AbilityClause(abilityName, abilityBase.get().getClass());
+    }
+
+    public MoveClause getMoveClause(String moveName) {
+        try {
+            return new MoveClause(moveName, moveName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            this.plugin.getLogger().error("Error adding move " + moveName + ". please check config.");
+        }
+        return null;
+    }
+
     public void addPokemonClause(String pokemonName) {
+        if (pokemonName.equalsIgnoreCase("legendary")) {
+            for (EnumSpecies legendary : EnumSpecies.LEGENDARY_ENUMS) {
+                pokemonClauses.add(this.getPokemonClause(legendary.getPokemonName()));
+            }
+            return;
+        }
+
+        if (pokemonName.equalsIgnoreCase("ultrabreast")) {
+            for (EnumSpecies legendary : EnumSpecies.ultrabeasts) {
+                pokemonClauses.add(this.getPokemonClause(legendary.getPokemonName()));
+            }
+            return;
+        }
+
+        EnumSpecies species = EnumSpecies.getFromNameAnyCase(pokemonName);
+
+        Optional<PokemonForm> form = PokemonForm.getFromName(pokemonName);
+
+        if (species == null || !form.isPresent()) {
+            this.plugin.getLogger().error("Error adding pokemon " + pokemonName + ". please check config.");
+            return;
+        }
+
+        PokemonClause clause = this.getPokemonClause(pokemonName);
+
+        if (clause == null) {
+            this.plugin.getLogger().error("Error adding pokemon " + pokemonName + ". please check config.");
+            return;
+        }
+
+        pokemonClauses.add(clause);
+    }
+
+    public void addHeldItemClause(String itemName) {
+        ItemPreventClause clause = this.getHeldItemClause(itemName);
+        if (clause == null) {
+            this.plugin.getLogger().error("Error adding held item " + itemName + ". please check config.");
+            return;
+        }
+
+        this.itemPreventClauses.add(clause);
+    }
+
+    public void addMoveClause(String moveName) {
+        MoveClause clause = this.getMoveClause(moveName);
+
+        if (clause == null) {
+            this.plugin.getLogger().error("Error adding move " + moveName + ". please check config.");
+            return;
+        }
+
+        this.moveClauses.add(clause);
+    }
+
+    public void addAbilityClause(String abilityName) {
+        AbilityClause clause = this.getAbilityClause(abilityName);
+
+        if (clause == null) {
+            this.plugin.getLogger().error("Error adding ability " + abilityName + ". please check config.");
+            return;
+        }
+
+        this.abilityClauses.add(clause);
+    }
+
+    public RachamonPixelmonShowdownRuleManager load() {
+
+        BattleLeagueConfig.League league = this.plugin.getLeague().getLeagues().get(this.leagueName);
+
+        for (String pokemon : league.getPokemonClaus()) {
+            this.addPokemonClause(pokemon);
+        }
+
+        for (String pokemon : league.getHeldItemClause()) {
+            this.addHeldItemClause(pokemon);
+        }
+
+        for (String pokemon : league.getMoveClaus()) {
+            this.addMoveClause(pokemon);
+        }
+
+        for (String pokemon : league.getAbilities()) {
+            this.addAbilityClause(pokemon);
+        }
+
+        for (BattleLeagueConfig.ComplexClaus complex : league.getComplexClaus()) {
+            this.addComplexClause(complex);
+        }
+
+        return this;
 
     }
 
-    public void build() {
+    public RachamonPixelmonShowdownRuleManager build() {
         BattleRules battleRules = new BattleRules();
         BattleLeagueConfig.League league = this.plugin.getLeague().getLeagues().get(this.leagueName);
-
-        if (league == null) {
-            this.plugin.getLogger().error("error on build battle rules, " + leagueName);
-            return;
-        }
 
         battleRules.fullHeal = league.getBattleRule().isFullHeal();
         battleRules.battleType = league
@@ -105,12 +287,25 @@ public class RachamonPixelmonShowdownRuleManager {
         clauses.addAll(complexClauses);
         clauses.addAll(itemPreventClauses);
 
+        return this;
+
     }
 
-    public boolean isValidated() {
+    public List<BattleClause> validate(List<Pokemon> team) {
+        List<BattleClause> clauseList = battleRules.getClauseList();
+        List<BattleClause> caughtClauses = new ArrayList<>();
+        for (BattleClause clause : clauseList) {
+            if (!clause.validateTeam(team)) {
+                continue;
+            }
 
-        return false;
+            caughtClauses.add(clause);
+        }
+        return caughtClauses;
     }
 
 
+    public BattleRules getBattleRules() {
+        return battleRules;
+    }
 }
