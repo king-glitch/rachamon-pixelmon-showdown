@@ -2,6 +2,7 @@ package dev.rachamon.rachamonpixelmonshowdown;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import dev.rachamon.api.common.database.IDatabaseConnector;
 import dev.rachamon.api.sponge.command.SpongeCommandService;
 import dev.rachamon.api.sponge.config.SpongeAPIConfigFactory;
 import dev.rachamon.api.sponge.implement.plugin.IRachamonPlugin;
@@ -54,6 +55,8 @@ public class RachamonPixelmonShowdown extends RachamonSpongePluginProvider imple
     private SpongeAPIConfigFactory<RachamonPixelmonShowdown, MainConfig> config;
     private SpongeAPIConfigFactory<RachamonPixelmonShowdown, LanguageConfig> language;
     private SpongeAPIConfigFactory<RachamonPixelmonShowdown, BattleLeagueConfig> league;
+
+    private IDatabaseConnector databaseConnector;
     private boolean isInitialized = false;
 
     public RachamonPixelmonShowdown() {
@@ -226,6 +229,14 @@ public class RachamonPixelmonShowdown extends RachamonSpongePluginProvider imple
 
     public BattleLeagueConfig getLeague() {
         return this.league.getRoot();
+    }
+
+    public IDatabaseConnector getDatabaseConnector() {
+        return databaseConnector;
+    }
+
+    public void setDatabaseConnector(IDatabaseConnector databaseConnector) {
+        this.databaseConnector = databaseConnector;
     }
 
     /**

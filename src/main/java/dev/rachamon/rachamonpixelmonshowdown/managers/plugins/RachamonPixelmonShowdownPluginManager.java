@@ -1,5 +1,8 @@
 package dev.rachamon.rachamonpixelmonshowdown.managers.plugins;
 
+import dev.rachamon.api.common.database.IDatabaseConnector;
+import dev.rachamon.api.common.database.MySQLConnectorProvider;
+import dev.rachamon.api.common.database.SQLiteConnectorProvider;
 import dev.rachamon.api.sponge.config.SpongeAPIConfigFactory;
 import dev.rachamon.api.sponge.exception.AnnotatedCommandException;
 import dev.rachamon.api.sponge.implement.plugin.IRachamonPluginManager;
@@ -9,6 +12,7 @@ import dev.rachamon.rachamonpixelmonshowdown.commands.PixelmonShowdownMainComman
 import dev.rachamon.rachamonpixelmonshowdown.configs.BattleLeagueConfig;
 import dev.rachamon.rachamonpixelmonshowdown.configs.LanguageConfig;
 import dev.rachamon.rachamonpixelmonshowdown.configs.MainConfig;
+import dev.rachamon.rachamonpixelmonshowdown.services.PlayerDataService;
 
 public class RachamonPixelmonShowdownPluginManager implements IRachamonPluginManager {
     private final RachamonPixelmonShowdown plugin = RachamonPixelmonShowdown.getInstance();
@@ -35,6 +39,26 @@ public class RachamonPixelmonShowdownPluginManager implements IRachamonPluginMan
     @Override
     public void postInitialize() {
         this.reload();
+        try {
+            if (this.plugin.getConfig().getRoot().getDatabaseCategorySetting().isEnableMySql()) {
+
+                MainConfig.DatabaseCategorySetting databaseCategorySetting = this.plugin
+                        .getConfig()
+                        .getRoot()
+                        .getDatabaseCategorySetting();
+
+                this.plugin.setDatabaseConnector(new MySQLConnectorProvider(databaseCategorySetting.getHostName(), databaseCategorySetting.getPort(), databaseCategorySetting.getDatabaseName(), databaseCategorySetting.getUsername(), databaseCategorySetting.getPassword(), databaseCategorySetting.getEnableSSL()));
+                this.plugin.getLogger().info("Data handler connected using MySQL.");
+            } else {
+                this.plugin.setDatabaseConnector(new SQLiteConnectorProvider(this.plugin.getDirectory().toAbsolutePath() + "/database.db"));
+                this.plugin.getLogger().info("Data handler connected using SQLite.");
+            }
+
+            PlayerDataService.initializeDatabase();
+        } catch (Exception e) {
+            e.printStackTrace();
+            this.plugin.getLogger().error("error on connecting to database");
+        }
     }
 
     @Override
@@ -46,6 +70,7 @@ public class RachamonPixelmonShowdownPluginManager implements IRachamonPluginMan
     public void reload() {
         this.registerConfigs();
         this.registerCommands();
+
     }
 
     private void registerConfigs() {
@@ -76,6 +101,7 @@ public class RachamonPixelmonShowdownPluginManager implements IRachamonPluginMan
                 .build());
 
         this.plugin.getLogger().setDebug(this.plugin.getConfig().getRoot().getMainCategorySetting().isDebug());
+
     }
 
     private void registerCommands() {
