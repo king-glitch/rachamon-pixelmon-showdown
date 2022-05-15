@@ -38,11 +38,11 @@ public class PixelmonShowdownQueueCommand implements IPlayerCommand, IParameteri
             } else if (interaction.get().equalsIgnoreCase("leave")) {
                 RachamonPixelmonShowdown.getInstance().getMatchMakingManager().leaveQueue(league.get(), source);
             } else if (interaction.get().equalsIgnoreCase("stats")) {
-                RachamonPixelmonShowdown.getInstance().getMatchMakingManager().leagueStats();
+                RachamonPixelmonShowdown.getInstance().getMatchMakingManager().leagueStats(league.get());
             } else if (interaction.get().equalsIgnoreCase("leaderboard")) {
-                RachamonPixelmonShowdown.getInstance().getMatchMakingManager().leagueLeaderboard();
+                RachamonPixelmonShowdown.getInstance().getMatchMakingManager().leagueLeaderboard(league.get(), source);
             } else if (interaction.get().equalsIgnoreCase("rules")) {
-                RachamonPixelmonShowdown.getInstance().getMatchMakingManager().leagueRules();
+                RachamonPixelmonShowdown.getInstance().getMatchMakingManager().leagueRules(league.get());
             }
         } catch (Exception e) {
             e.printStackTrace();

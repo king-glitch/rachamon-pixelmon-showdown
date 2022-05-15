@@ -64,6 +64,19 @@ public class LanguageConfig {
         @Setting(value = "league-not-found", comment = "league not exists.")
         protected String leagueNotFound = "&aLeague name doesn't exists.";
 
+        @Setting(value = "league-leaderboard-value", comment = "leaderboard value info")
+        protected String leagueLeaderboardValue = "&c{rank}&7. &a&l{player}&r &aelo&8: &a&l{elo}&r.";
+
+        @Setting(value = "league-stats-value", comment = "stats value info")
+        protected String[] leagueStatsValue = new String[]{
+                "",
+                "Elo: {elo}",
+                "Winrate: {win-rate}",
+                "Wins: {wins}",
+                "Loses: {loses}",
+                "",
+        };
+
         public String getPrefix() {
             return prefix;
         }
@@ -134,6 +147,14 @@ public class LanguageConfig {
 
         public String getLeagueNotFound() {
             return leagueNotFound;
+        }
+
+        public String getLeagueLeaderboardValue() {
+            return leagueLeaderboardValue;
+        }
+
+        public String[] getLeagueStatsValue() {
+            return leagueStatsValue;
         }
     }
 

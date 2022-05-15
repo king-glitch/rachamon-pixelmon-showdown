@@ -63,6 +63,10 @@ public class RachamonPixelmonShowdownEloManager {
         return this.cache.get(uuid);
     }
 
+    public Map<UUID, PlayerEloProfile> getCache() {
+        return this.cache;
+    }
+
     public boolean hasPlayer(UUID uuid) {
         return this.cache.containsKey(uuid);
     }

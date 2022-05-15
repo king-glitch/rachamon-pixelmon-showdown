@@ -26,8 +26,17 @@ public class RachamonPixelmonShowdownQueueManager {
         }
     }
 
-    public QueueService findQueue(String leagueName) {
-        return this.queue.get(leagueName);
+    public QueueService findQueue(String leagueName) throws Exception {
+        QueueService queueService = this.queue.get(leagueName);
+        if (queueService == null) {
+            throw new Exception(RachamonPixelmonShowdown
+                    .getInstance()
+                    .getLanguage()
+                    .getGeneralLanguageBattle()
+                    .getLeagueNotFound());
+        }
+
+        return queueService;
     }
 
     public void addQueue(String leagueName, QueueService queueService) {

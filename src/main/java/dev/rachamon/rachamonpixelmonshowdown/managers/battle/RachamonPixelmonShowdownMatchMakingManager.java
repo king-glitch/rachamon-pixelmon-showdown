@@ -6,6 +6,7 @@ import com.pixelmonmod.pixelmon.battles.BattleRegistry;
 import com.pixelmonmod.pixelmon.battles.controller.participants.PlayerParticipant;
 import com.pixelmonmod.pixelmon.battles.rules.BattleRules;
 import com.pixelmonmod.pixelmon.entities.pixelmon.EntityPixelmon;
+import dev.rachamon.api.sponge.util.TextUtil;
 import dev.rachamon.rachamonpixelmonshowdown.RachamonPixelmonShowdown;
 import dev.rachamon.rachamonpixelmonshowdown.services.QueueService;
 import dev.rachamon.rachamonpixelmonshowdown.structures.PlayerEloProfile;
@@ -14,6 +15,9 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.service.pagination.PaginationList;
+import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.text.Text;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -104,12 +108,16 @@ public class RachamonPixelmonShowdownMatchMakingManager {
         }
 
         Task start = Task.builder().execute(() -> {
-            RachamonPixelmonShowdownMatchMakingManager.startBattle(playerUuid1, playerPokemonList1, null, playerUuid2, playerPokemonList2, null, ruleManager);
+            try {
+                RachamonPixelmonShowdownMatchMakingManager.startBattle(playerUuid1, playerPokemonList1, null, playerUuid2, playerPokemonList2, null, ruleManager);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }).delay(prepareTime, TimeUnit.SECONDS).submit(RachamonPixelmonShowdown.getInstance());
 
     }
 
-    public static void startBattle(UUID uuid1, ArrayList<Pokemon> playerOnePokemons, Pokemon playerOneStarterPokemon, UUID uuid2, ArrayList<Pokemon> playerTwoPokemons, Pokemon playerTwoStarterPokemon, RachamonPixelmonShowdownRuleManager ruleManager) {
+    public static void startBattle(UUID uuid1, ArrayList<Pokemon> playerOnePokemons, Pokemon playerOneStarterPokemon, UUID uuid2, ArrayList<Pokemon> playerTwoPokemons, Pokemon playerTwoStarterPokemon, RachamonPixelmonShowdownRuleManager ruleManager) throws Exception {
 
         QueueService queueService = queueManager.findQueue(ruleManager.getLeagueName());
         queueService.addPlayerInMatch(uuid1);
@@ -441,13 +449,74 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
     }
 
-    public void leagueStats() {
+    public void leagueStats(String leagueName, Player player) throws Exception {
+
+        QueueService queueService = RachamonPixelmonShowdownMatchMakingManager.queueManager.findQueue(leagueName);
+        RachamonPixelmonShowdownEloManager eloManager = queueService.getEloManager();
+        PlayerEloProfile profile = eloManager.getProfileData(player.getUniqueId());
+        int wins = profile.getWin();
+        int loses = profile.getLose();
+        int elo = profile.getElo();
+        double winRate = Math.round(wins * 100.0 / (wins + loses));
+
+        PaginationList.Builder builder = PaginationList
+                .builder()
+                .title(TextUtil.toText("&6&lStats"))
+                .padding(TextUtil.toText("&8="));
+
+
+        List<Text> contents = new ArrayList<>();
+
+        for (String text : this.plugin.getLanguage().getGeneralLanguageBattle().getLeagueStatsValue()) {
+            text = text
+                    .replaceAll("\\{win-rate}", winRate + "")
+                    .replaceAll("\\{wins}", wins + "")
+                    .replaceAll("\\{loses}", loses + "")
+                    .replaceAll("\\{elo}", elo + "");
+            contents.add(TextUtil.toText(text));
+        }
+
+        builder.contents(contents).sendTo(player);
     }
 
-    public void leagueLeaderboard() {
+    public void leagueLeaderboard(String leagueName, Player player) throws Exception {
+
+        QueueService queueService = RachamonPixelmonShowdownMatchMakingManager.queueManager.findQueue(leagueName);
+
+        RachamonPixelmonShowdownEloManager eloManager = queueService.getEloManager();
+
+
+        PaginationList.Builder builder = PaginationList
+                .builder()
+                .title(TextUtil.toText("&6&lLeaderboard"))
+                .padding(TextUtil.toText("&8="));
+
+
+        List<Text> contents = new ArrayList<>();
+        int i = 1;
+        for (PlayerEloProfile profile : eloManager.getCache().values()) {
+            String text = plugin
+                    .getLanguage()
+                    .getGeneralLanguageBattle()
+                    .getLeagueLeaderboardValue()
+                    .replaceAll("\\{rank}", String.valueOf(i))
+                    .replaceAll("\\{player}", Objects
+                            .requireNonNull(Objects.requireNonNull(Sponge
+                                    .getServiceManager()
+                                    .provide(UserStorageService.class)
+                                    .flatMap(storage -> storage.get(profile.getUuid()))
+                                    .orElse(null)))
+                            .getName())
+                    .replaceAll("\\{elo}", String.valueOf(profile.getElo()));
+            contents.add(TextUtil.toText(text));
+            i++;
+        }
+
+        builder.contents(contents).sendTo(player);
+
     }
 
-    public void leagueRules() {
+    public void leagueRules(String leagueName) {
     }
 
     public void enterQueue(String leagueName, Player player) throws Exception {
