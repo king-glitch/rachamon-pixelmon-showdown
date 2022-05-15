@@ -10,9 +10,51 @@ public class MainConfig {
 
     @Setting(value = "elo-management", comment = "Management of Elo system and how it will function")
     private final EloManagementCategorySetting eloManagementCategorySetting = new EloManagementCategorySetting();
+
+    @Setting(value = "queue-management", comment = "Management of Queue system")
+    private final QueueManagementCategorySetting queueManagementCategorySetting = new QueueManagementCategorySetting();
     @Setting(value = "database", comment = "Database Settings")
     private final DatabaseCategorySetting databaseCategorySetting = new DatabaseCategorySetting();
 
+
+    @ConfigSerializable
+    public static class QueueManagementCategorySetting {
+        @Setting(value = "match-maker-timer", comment = "Sets the time the queue waits to attempt matching players (seconds) [default: 10]")
+        protected int matchMakerTimer = 10;
+
+        @Setting(value = "match-maker-bias-value", comment = "Value that match making will expand per check. Higher values will decrease wait time but lower match quality. [default: 25]")
+        protected int matchMakerBiasValue = 25;
+
+        @Setting(value = "battle-preparation-time", comment = "Preparation time players have before battle commences in seconds [default: 30]")
+        protected int battlePreparationTime = 30;
+
+        @Setting(value = "team-preview-time", comment = "Time preview is active for (Time included in battle preparation time -- do not set equal or higher than battle preparation!) [default: 15]")
+        protected int teamPreviewTime = 15;
+
+        @Setting(value = "match-threshold-value", comment = "The range people will try to be matched within. Higher values will decrease wait time but lower match quality [default: 150]")
+        protected int matchThresholdValue = 150;
+
+
+        public int getMatchMakerTimer() {
+            return matchMakerTimer;
+        }
+
+        public int getMatchMakerBiasValue() {
+            return matchMakerBiasValue;
+        }
+
+        public int getBattlePreparationTime() {
+            return battlePreparationTime;
+        }
+
+        public int getTeamPreviewTime() {
+            return teamPreviewTime;
+        }
+
+        public int getMatchThresholdValue() {
+            return matchThresholdValue;
+        }
+    }
 
     @ConfigSerializable
     public static class EloManagementCategorySetting {
@@ -137,6 +179,10 @@ public class MainConfig {
         public int getPort() {
             return port;
         }
+    }
+
+    public QueueManagementCategorySetting getQueueManagementCategorySetting() {
+        return queueManagementCategorySetting;
     }
 
     public EloManagementCategorySetting getEloManagementCategorySetting() {

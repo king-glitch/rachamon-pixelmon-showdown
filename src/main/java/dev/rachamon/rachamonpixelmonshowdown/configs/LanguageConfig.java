@@ -19,6 +19,9 @@ public class LanguageConfig {
         @Setting(value = "lose-message", comment = "lose message after the player has lost.")
         protected String loseMessage = "&cYou have lost against player &a&l{player}&7, current elo &7&l{current}&l &8-> &c&l{new-elo}";
 
+        @Setting(value = "starting-message", comment = "message before matching starting")
+        protected String startingMessage = "&7The match will start in &a&l{time}&7 seconds, get ready!";
+
         public String getPrefix() {
             return prefix;
         }
@@ -29,6 +32,10 @@ public class LanguageConfig {
 
         public String getLoseMessage() {
             return loseMessage;
+        }
+
+        public String getStartingMessage() {
+            return startingMessage;
         }
     }
 

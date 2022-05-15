@@ -72,4 +72,8 @@ public class RachamonPixelmonShowdownQueueManager {
     public QueueService getPlayerInAction(UUID uuid) {
         return this.queue.values().stream().filter(v -> v.isPlayerInAction(uuid)).findFirst().orElse(null);
     }
+
+    public Map<String, QueueService> getQueue() {
+        return queue;
+    }
 }

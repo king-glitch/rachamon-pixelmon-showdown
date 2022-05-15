@@ -12,6 +12,7 @@ import dev.rachamon.rachamonpixelmonshowdown.configs.BattleLeagueConfig;
 import dev.rachamon.rachamonpixelmonshowdown.configs.LanguageConfig;
 import dev.rachamon.rachamonpixelmonshowdown.configs.MainConfig;
 import dev.rachamon.rachamonpixelmonshowdown.managers.battle.RachamonPixelmonShowdownBattleManager;
+import dev.rachamon.rachamonpixelmonshowdown.managers.battle.RachamonPixelmonShowdownMatchMakingManager;
 import dev.rachamon.rachamonpixelmonshowdown.managers.battle.RachamonPixelmonShowdownQueueManager;
 import dev.rachamon.rachamonpixelmonshowdown.managers.plugins.RachamonPixelmonShowdownPluginManager;
 import ninja.leaping.configurate.objectmapping.GuiceObjectMapperFactory;
@@ -248,14 +249,19 @@ public class RachamonPixelmonShowdown extends RachamonSpongePluginProvider imple
         return this.getComponents().queueManager;
     }
 
+    public RachamonPixelmonShowdownMatchMakingManager getMatchMakingManager() {
+        return this.getComponents().matchMakingManager;
+    }
+
     /**
      * The type Components.
      */
     public static class Components {
         @Inject
         private RachamonPixelmonShowdownBattleManager battleManager;
-
         @Inject
         private RachamonPixelmonShowdownQueueManager queueManager;
+        @Inject
+        private RachamonPixelmonShowdownMatchMakingManager matchMakingManager;
     }
 }

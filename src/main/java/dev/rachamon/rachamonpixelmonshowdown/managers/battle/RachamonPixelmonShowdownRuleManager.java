@@ -11,7 +11,6 @@ import com.pixelmonmod.pixelmon.enums.forms.IEnumForm;
 import com.pixelmonmod.pixelmon.enums.heldItems.EnumHeldItems;
 import dev.rachamon.rachamonpixelmonshowdown.RachamonPixelmonShowdown;
 import dev.rachamon.rachamonpixelmonshowdown.configs.BattleLeagueConfig;
-import dev.rachamon.rachamonpixelmonshowdown.services.QueueService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +20,8 @@ public class RachamonPixelmonShowdownRuleManager {
 
     public final RachamonPixelmonShowdown plugin = RachamonPixelmonShowdown.getInstance();
 
-    private BattleRules battleRules = new BattleRules();
-    private final String leagueName;
+    private final BattleRules battleRules = new BattleRules();
+    private BattleLeagueConfig.League league = null;
     private int complexNum = 0;
     private final List<PokemonClause> pokemonClauses = new ArrayList<>();
     private final List<MoveClause> moveClauses = new ArrayList<>();
@@ -32,14 +31,13 @@ public class RachamonPixelmonShowdownRuleManager {
 
     public RachamonPixelmonShowdownRuleManager(String leagueName) throws Exception {
 
-        BattleLeagueConfig.League league = this.plugin.getLeague().getLeagues().get(leagueName);
+        this.league = this.plugin.getLeague().getLeagues().get(leagueName);
 
-        if (league == null) {
+        if (this.league == null) {
             this.plugin.getLogger().error("error on build battle rules, " + leagueName);
             throw new Exception("error on build battle rules, " + leagueName);
         }
 
-        this.leagueName = leagueName;
     }
 
     private PokemonClause getPokemonClause(String pokemonName) {
@@ -236,25 +234,23 @@ public class RachamonPixelmonShowdownRuleManager {
 
     public RachamonPixelmonShowdownRuleManager load() {
 
-        BattleLeagueConfig.League league = this.plugin.getLeague().getLeagues().get(this.leagueName);
-
-        for (String pokemon : league.getPokemonClaus()) {
+        for (String pokemon : this.league.getPokemonClaus()) {
             this.addPokemonClause(pokemon);
         }
 
-        for (String pokemon : league.getHeldItemClause()) {
+        for (String pokemon : this.league.getHeldItemClause()) {
             this.addHeldItemClause(pokemon);
         }
 
-        for (String pokemon : league.getMoveClaus()) {
+        for (String pokemon : this.league.getMoveClaus()) {
             this.addMoveClause(pokemon);
         }
 
-        for (String pokemon : league.getAbilities()) {
+        for (String pokemon : this.league.getAbilities()) {
             this.addAbilityClause(pokemon);
         }
 
-        for (BattleLeagueConfig.ComplexClaus complex : league.getComplexClaus()) {
+        for (BattleLeagueConfig.ComplexClaus complex : this.league.getComplexClaus()) {
             this.addComplexClause(complex);
         }
 
@@ -264,20 +260,19 @@ public class RachamonPixelmonShowdownRuleManager {
 
     public RachamonPixelmonShowdownRuleManager build() {
         BattleRules battleRules = new BattleRules();
-        BattleLeagueConfig.League league = this.plugin.getLeague().getLeagues().get(this.leagueName);
 
-        battleRules.fullHeal = league.getBattleRule().isFullHeal();
+        battleRules.fullHeal = this.league.getBattleRule().isFullHeal();
         battleRules.battleType = league
                 .getBattleRule()
                 .isDoubleBattle() ? EnumBattleType.Double : EnumBattleType.Single;
-        battleRules.levelCap = league.getBattleRule().getLevelCapacity();
-        battleRules.raiseToCap = league.getBattleRule().isRaiseMaxLevel();
-        battleRules.teamPreview = league.getBattleRule().isEnableTeamPreview();
-        battleRules.turnTime = league.getBattleRule().getTurnTime();
-        battleRules.numPokemon = league.getBattleRule().getPokemonAmount();
+        battleRules.levelCap = this.league.getBattleRule().getLevelCapacity();
+        battleRules.raiseToCap = this.league.getBattleRule().isRaiseMaxLevel();
+        battleRules.teamPreview = this.league.getBattleRule().isEnableTeamPreview();
+        battleRules.turnTime = this.league.getBattleRule().getTurnTime();
+        battleRules.numPokemon = this.league.getBattleRule().getPokemonAmount();
 
         List<BattleClause> clauses = battleRules.getClauseList();
-        if (league.getBattleRule().isBagBanned()) {
+        if (this.league.getBattleRule().isBagBanned()) {
             clauses.add(new BattleClause("bag"));
         }
 
@@ -307,5 +302,9 @@ public class RachamonPixelmonShowdownRuleManager {
 
     public BattleRules getBattleRules() {
         return battleRules;
+    }
+
+    public BattleLeagueConfig.League getLeague() {
+        return league;
     }
 }
