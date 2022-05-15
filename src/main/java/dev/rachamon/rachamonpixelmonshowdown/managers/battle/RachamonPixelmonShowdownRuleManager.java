@@ -21,6 +21,7 @@ public class RachamonPixelmonShowdownRuleManager {
     public final RachamonPixelmonShowdown plugin = RachamonPixelmonShowdown.getInstance();
 
     private final BattleRules battleRules = new BattleRules();
+    private final String leagueName;
     private BattleLeagueConfig.League league = null;
     private int complexNum = 0;
     private final List<PokemonClause> pokemonClauses = new ArrayList<>();
@@ -31,7 +32,8 @@ public class RachamonPixelmonShowdownRuleManager {
 
     public RachamonPixelmonShowdownRuleManager(String leagueName) throws Exception {
 
-        this.league = this.plugin.getLeague().getLeagues().get(leagueName);
+        this.leagueName = leagueName;
+        this.league = this.plugin.getLeague().getLeagues().get(this.leagueName);
 
         if (this.league == null) {
             this.plugin.getLogger().error("error on build battle rules, " + leagueName);
@@ -306,5 +308,9 @@ public class RachamonPixelmonShowdownRuleManager {
 
     public BattleLeagueConfig.League getLeague() {
         return league;
+    }
+
+    public String getLeagueName() {
+        return leagueName;
     }
 }

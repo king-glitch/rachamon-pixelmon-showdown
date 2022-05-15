@@ -2,12 +2,15 @@ package dev.rachamon.rachamonpixelmonshowdown.commands.subcommands;
 
 import dev.rachamon.api.sponge.implement.command.*;
 import dev.rachamon.rachamonpixelmonshowdown.RachamonPixelmonShowdown;
-import net.minecraft.entity.player.EntityPlayerMP;
+import dev.rachamon.rachamonpixelmonshowdown.commands.elements.LeagueInteractionCommandElement;
+import dev.rachamon.rachamonpixelmonshowdown.commands.elements.LeagueNameCommandElement;
+import dev.rachamon.rachamonpixelmonshowdown.utils.ChatUtil;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -22,18 +25,28 @@ public class PixelmonShowdownQueueCommand implements IPlayerCommand, IParameteri
     public CommandResult execute(@Nonnull Player source, @Nonnull CommandContext args) throws CommandException {
 
         Optional<String> league = args.getOne("league");
+        Optional<String> interaction = args.getOne("interaction");
 
-        if (!league.isPresent()) {
+        if (!league.isPresent() || !interaction.isPresent()) {
             return CommandResult.empty();
         }
 
+
         try {
-            RachamonPixelmonShowdown
-                    .getInstance()
-                    .getMatchMakingManager()
-                    .enterQueue(league.get(), (EntityPlayerMP) source);
+            if (interaction.get().equalsIgnoreCase("enter")) {
+                RachamonPixelmonShowdown.getInstance().getMatchMakingManager().enterQueue(league.get(), source);
+            } else if (interaction.get().equalsIgnoreCase("leave")) {
+                RachamonPixelmonShowdown.getInstance().getMatchMakingManager().leaveQueue(league.get(), source);
+            } else if (interaction.get().equalsIgnoreCase("stats")) {
+                RachamonPixelmonShowdown.getInstance().getMatchMakingManager().leagueStats();
+            } else if (interaction.get().equalsIgnoreCase("leaderboard")) {
+                RachamonPixelmonShowdown.getInstance().getMatchMakingManager().leagueLeaderboard();
+            } else if (interaction.get().equalsIgnoreCase("rules")) {
+                RachamonPixelmonShowdown.getInstance().getMatchMakingManager().leagueRules();
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            ChatUtil.sendMessage(source, e.getMessage());
         }
 
 
@@ -42,6 +55,6 @@ public class PixelmonShowdownQueueCommand implements IPlayerCommand, IParameteri
 
     @Override
     public CommandElement[] getArguments() {
-        return new CommandElement[]{};
+        return new CommandElement[]{new LeagueNameCommandElement(Text.of("league")), new LeagueInteractionCommandElement(Text.of("interaction"))};
     }
 }

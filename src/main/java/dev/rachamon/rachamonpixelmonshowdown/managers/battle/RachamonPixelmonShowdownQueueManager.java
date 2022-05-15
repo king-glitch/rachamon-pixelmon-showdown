@@ -3,6 +3,7 @@ package dev.rachamon.rachamonpixelmonshowdown.managers.battle;
 import dev.rachamon.rachamonpixelmonshowdown.RachamonPixelmonShowdown;
 import dev.rachamon.rachamonpixelmonshowdown.services.QueueService;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -57,18 +58,22 @@ public class RachamonPixelmonShowdownQueueManager {
         return this.queue.values().stream().anyMatch(q -> q.isPlayerInAction(uuid));
     }
 
+    @Nullable
     public QueueService getPlayerInMatch(UUID uuid) {
         return this.queue.values().stream().filter(v -> v.isPlayerInMatch(uuid)).findFirst().orElse(null);
     }
 
+    @Nullable
     public QueueService getPlayerInPreMatch(UUID uuid) {
         return this.queue.values().stream().filter(v -> v.isPlayerInPreMatch(uuid)).findFirst().orElse(null);
     }
 
+    @Nullable
     public QueueService getPlayerInQueue(UUID uuid) {
         return this.queue.values().stream().filter(v -> v.isPlayerInQueue(uuid)).findFirst().orElse(null);
     }
 
+    @Nullable
     public QueueService getPlayerInAction(UUID uuid) {
         return this.queue.values().stream().filter(v -> v.isPlayerInAction(uuid)).findFirst().orElse(null);
     }

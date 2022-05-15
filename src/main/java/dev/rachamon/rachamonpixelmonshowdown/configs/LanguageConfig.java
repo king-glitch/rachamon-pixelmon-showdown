@@ -22,6 +22,48 @@ public class LanguageConfig {
         @Setting(value = "starting-message", comment = "message before matching starting")
         protected String startingMessage = "&7The match will start in &a&l{time}&7 seconds, get ready!";
 
+        @Setting(value = "already-in-battle", comment = "one player is already in battle")
+        protected String alreadyInBattle = "A participant is already in battle! Battle cancelled.";
+
+        @Setting(value = "your-team-has-fainted", comment = "some pokemon has been fainted")
+        protected String yourTeamHasFainted = "&cOne of your pokemon has been fained.";
+
+        @Setting(value = "participant-team-has-fainted", comment = "some pokemon has been fainted")
+        protected String participantTeamHasFainted = "&cOne of your participant pokemon has been fained.";
+
+        @Setting(value = "your-team-not-same", comment = "team party not same")
+        protected String yourTeamNotSame = "&cYour party is not the same as what you queued with!";
+
+        @Setting(value = "participant-team-not-same", comment = "team party not same")
+        protected String participantTeamNotSame = "&cA participant's team was found ineligible! Battle cancelled.";
+
+        @Setting(value = "your-team-not-validated", comment = "team party not validated rules")
+        protected String yourTeamNotValidated = "&cYour party does not follow the formats rules!";
+
+        @Setting(value = "participant-team-not-validated", comment = "team party not validated rules")
+        protected String participantTeamNotValidated = "&cA participant's team did not follow the format's rules! Battle cancelled";
+
+        @Setting(value = "you-already-in-battle", comment = "already in battle")
+        protected String youAlreadyInBattle = "&cYou are already in battle!";
+
+        @Setting(value = "participant-already-in-battle", comment = "already in battle")
+        protected String participantAlreadyInBattle = "&cA participant is already in battle! Battle cancelled.";
+
+        @Setting(value = "player-not-found-battle", comment = "player not found")
+        protected String playerNotFoundBattle = "&cPlayer not found, A player might be disconnected! Battle cancelled.";
+
+        @Setting(value = "player-enter-queue", comment = "when player enter the queue")
+        protected String playerEnterQueue = "&aYou have entered league {league} queue.";
+
+        @Setting(value = "player-leave-queue", comment = "when player leave the queue")
+        protected String playerLeaveQueue = "&aYou have leaved league {league} queue.";
+
+        @Setting(value = "not-in-queue", comment = "player is not in a queue")
+        protected String notInQueue = "&aYou are not in a queue.";
+
+        @Setting(value = "league-not-found", comment = "league not exists.")
+        protected String leagueNotFound = "&aLeague name doesn't exists.";
+
         public String getPrefix() {
             return prefix;
         }
@@ -36,6 +78,62 @@ public class LanguageConfig {
 
         public String getStartingMessage() {
             return startingMessage;
+        }
+
+        public String getAlreadyInBattle() {
+            return alreadyInBattle;
+        }
+
+        public String getYourTeamHasFainted() {
+            return yourTeamHasFainted;
+        }
+
+        public String getParticipantTeamHasFainted() {
+            return participantTeamHasFainted;
+        }
+
+        public String getYourTeamNotSame() {
+            return yourTeamNotSame;
+        }
+
+        public String getParticipantTeamNotSame() {
+            return participantTeamNotSame;
+        }
+
+        public String getYourTeamNotValidated() {
+            return yourTeamNotValidated;
+        }
+
+        public String getParticipantTeamNotValidated() {
+            return participantTeamNotValidated;
+        }
+
+        public String getYouAlreadyInBattle() {
+            return youAlreadyInBattle;
+        }
+
+        public String getParticipantAlreadyInBattle() {
+            return participantAlreadyInBattle;
+        }
+
+        public String getPlayerNotFoundBattle() {
+            return playerNotFoundBattle;
+        }
+
+        public String getPlayerEnterQueue() {
+            return playerEnterQueue;
+        }
+
+        public String getPlayerLeaveQueue() {
+            return playerLeaveQueue;
+        }
+
+        public String getNotInQueue() {
+            return notInQueue;
+        }
+
+        public String getLeagueNotFound() {
+            return leagueNotFound;
         }
     }
 

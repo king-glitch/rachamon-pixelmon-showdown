@@ -1,6 +1,5 @@
 package dev.rachamon.rachamonpixelmonshowdown.managers.plugins;
 
-import dev.rachamon.api.common.database.IDatabaseConnector;
 import dev.rachamon.api.common.database.MySQLConnectorProvider;
 import dev.rachamon.api.common.database.SQLiteConnectorProvider;
 import dev.rachamon.api.sponge.config.SpongeAPIConfigFactory;
@@ -12,7 +11,9 @@ import dev.rachamon.rachamonpixelmonshowdown.commands.PixelmonShowdownMainComman
 import dev.rachamon.rachamonpixelmonshowdown.configs.BattleLeagueConfig;
 import dev.rachamon.rachamonpixelmonshowdown.configs.LanguageConfig;
 import dev.rachamon.rachamonpixelmonshowdown.configs.MainConfig;
+import dev.rachamon.rachamonpixelmonshowdown.listeners.BattleListener;
 import dev.rachamon.rachamonpixelmonshowdown.services.PlayerDataService;
+import org.spongepowered.api.Sponge;
 
 public class RachamonPixelmonShowdownPluginManager implements IRachamonPluginManager {
     private final RachamonPixelmonShowdown plugin = RachamonPixelmonShowdown.getInstance();
@@ -26,7 +27,7 @@ public class RachamonPixelmonShowdownPluginManager implements IRachamonPluginMan
 
         this.plugin.getSpongeInjector().injectMembers(this.plugin.getComponents());
 
-//        Sponge.getEventManager().registerListeners(this.plugin, new PokemonTokenInteract());
+        Sponge.getEventManager().registerListeners(this.plugin, new BattleListener());
 
         this.plugin.setInitialized(true);
     }
@@ -50,7 +51,9 @@ public class RachamonPixelmonShowdownPluginManager implements IRachamonPluginMan
                 this.plugin.setDatabaseConnector(new MySQLConnectorProvider(databaseCategorySetting.getHostName(), databaseCategorySetting.getPort(), databaseCategorySetting.getDatabaseName(), databaseCategorySetting.getUsername(), databaseCategorySetting.getPassword(), databaseCategorySetting.getEnableSSL()));
                 this.plugin.getLogger().info("Data handler connected using MySQL.");
             } else {
-                this.plugin.setDatabaseConnector(new SQLiteConnectorProvider(this.plugin.getDirectory().toAbsolutePath() + "/database.db"));
+                this.plugin.setDatabaseConnector(new SQLiteConnectorProvider(this.plugin
+                        .getDirectory()
+                        .toAbsolutePath() + "/database.db"));
                 this.plugin.getLogger().info("Data handler connected using SQLite.");
             }
 
