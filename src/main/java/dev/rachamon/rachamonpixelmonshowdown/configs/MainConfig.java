@@ -7,10 +7,73 @@ import info.pixelmon.repack.ninja.leaping.configurate.objectmapping.serialize.Co
 public class MainConfig {
     @Setting(value = "general", comment = "General Settings")
     private final GeneralCategorySetting mainCategorySetting = new GeneralCategorySetting();
+
+    @Setting(value = "elo-management", comment = "Management of Elo system and how it will function")
+    private final EloManagementCategorySetting eloManagementCategorySetting = new EloManagementCategorySetting();
     @Setting(value = "database", comment = "Database Settings")
     private final DatabaseCategorySetting databaseCategorySetting = new DatabaseCategorySetting();
 
 
+    @ConfigSerializable
+    public static class EloManagementCategorySetting {
+
+        @Setting(comment = "Makes K-Factor same for all elo ranges [default: false]", value = "k-factor-persistent")
+        protected boolean kFactorPersistent = false;
+
+        @Setting(comment = "Makes K-Factor value [default: 30.0]", value = "k-factor-persistent-value")
+        protected double kFactorPersistentValue = 30.0;
+
+        @Setting(comment = "Makes K-Factor for high value [default: 30.0]", value = "k-factor-persistent-high-value")
+        protected double kFactorPersistentHighValue = 30.0;
+
+        @Setting(comment = "Makes K-Factor for mid value [default: = 40.0]", value = "k-factor-persistent-mid-value")
+        protected double kFactorPersistentMidValue = 40.0;
+
+        @Setting(comment = "Makes K-Factor for low value [default: 50.0]", value = "k-factor-persistent-low-value")
+        protected double kFactorPersistentLowValue = 50.0;
+
+        @Setting(comment = "Anything below low elo range is low elo [default: 1300]", value = "low-elo-range")
+        protected int lowEloRange = 1300;
+
+        @Setting(comment = "anything above high elo range is high elo [default: 1600]", value = "high-elo-range")
+        protected int highEloRange = 1600;
+
+        @Setting(comment = "default elo value [default: 1000]", value = "default-elo")
+        protected int defaultElo = 1000;
+
+
+        public boolean iskFactorPersistent() {
+            return kFactorPersistent;
+        }
+
+        public double getKFactorPersistentValue() {
+            return kFactorPersistentValue;
+        }
+
+        public double getKFactorPersistentHighValue() {
+            return kFactorPersistentHighValue;
+        }
+
+        public double getKFactorPersistentMidValue() {
+            return kFactorPersistentMidValue;
+        }
+
+        public double getKFactorPersistentLowValue() {
+            return kFactorPersistentLowValue;
+        }
+
+        public int getLowEloRange() {
+            return lowEloRange;
+        }
+
+        public int getHighEloRange() {
+            return highEloRange;
+        }
+
+        public int getDefaultElo() {
+            return defaultElo;
+        }
+    }
 
     @ConfigSerializable
     public static class GeneralCategorySetting {
@@ -76,9 +139,14 @@ public class MainConfig {
         }
     }
 
+    public EloManagementCategorySetting getEloManagementCategorySetting() {
+        return eloManagementCategorySetting;
+    }
+
     public DatabaseCategorySetting getDatabaseCategorySetting() {
         return databaseCategorySetting;
     }
+
     public GeneralCategorySetting getMainCategorySetting() {
         return mainCategorySetting;
     }

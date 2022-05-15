@@ -3,7 +3,6 @@ package dev.rachamon.rachamonpixelmonshowdown.services;
 import dev.rachamon.api.common.database.MySQLConnectorProvider;
 import dev.rachamon.rachamonpixelmonshowdown.RachamonPixelmonShowdown;
 import dev.rachamon.rachamonpixelmonshowdown.structures.PlayerEloProfile;
-import org.apache.http.concurrent.FutureCallback;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,8 +10,6 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.function.Consumer;
 
 public class PlayerDataService {

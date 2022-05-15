@@ -18,13 +18,14 @@ public class RachamonPixelmonShowdownEloManager {
         this.playerDataService = new PlayerDataService(leagueName);
     }
 
-    public void initialize() {
+    public RachamonPixelmonShowdownEloManager initialize() {
         this.playerDataService.getPlayers((cache) -> {
             this.cache = cache;
             this.ranks = new ArrayList<UUID>(cache.keySet());
             this.sort();
         });
 
+        return this;
     }
 
     public void sort() {

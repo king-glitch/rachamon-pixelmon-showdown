@@ -3,7 +3,6 @@ package dev.rachamon.rachamonpixelmonshowdown.managers.battle;
 import dev.rachamon.rachamonpixelmonshowdown.RachamonPixelmonShowdown;
 import dev.rachamon.rachamonpixelmonshowdown.services.QueueService;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -20,9 +19,8 @@ public class RachamonPixelmonShowdownQueueManager {
                     .load()
                     .build();
 
-            // TODO: add elo
-
-            QueueService queueService = new QueueService(ruleManager);
+            RachamonPixelmonShowdownEloManager eloManager = new RachamonPixelmonShowdownEloManager(leagueName).initialize();
+            QueueService queueService = new QueueService(ruleManager, eloManager);
             this.addQueue(leagueName, queueService);
         }
     }

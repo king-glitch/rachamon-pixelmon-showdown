@@ -1,5 +1,6 @@
 package dev.rachamon.rachamonpixelmonshowdown.services;
 
+import dev.rachamon.rachamonpixelmonshowdown.managers.battle.RachamonPixelmonShowdownEloManager;
 import dev.rachamon.rachamonpixelmonshowdown.managers.battle.RachamonPixelmonShowdownRuleManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
@@ -11,12 +12,14 @@ import java.util.UUID;
 public class QueueService {
 
     private final RachamonPixelmonShowdownRuleManager ruleManager;
+    private final RachamonPixelmonShowdownEloManager eloManager;
     private final ArrayList<UUID> inQueue = new ArrayList<>();
     private final ArrayList<UUID> inPreMatch = new ArrayList<>();
     private final ArrayList<UUID> inMatch = new ArrayList<>();
 
-    public QueueService(RachamonPixelmonShowdownRuleManager ruleManager) {
+    public QueueService(RachamonPixelmonShowdownRuleManager ruleManager, RachamonPixelmonShowdownEloManager eloManager) {
         this.ruleManager = ruleManager;
+        this.eloManager = eloManager;
     }
 
     public boolean isPlayerInQueue(UUID uuid) {
@@ -46,7 +49,9 @@ public class QueueService {
             return;
         }
 
-        // TODO: add elo
+        if (!this.eloManager.hasPlayer(uuid)) {
+            this.eloManager.addPlayer(uuid);
+        }
 
         this.inQueue.add(uuid);
     }
@@ -60,8 +65,6 @@ public class QueueService {
         if (this.isPlayerInMatch(uuid) || this.isPlayerInPreMatch(uuid)) {
             return;
         }
-
-        // TODO: add elo
 
         this.inPreMatch.add(uuid);
         this.inQueue.remove(uuid);
@@ -109,11 +112,14 @@ public class QueueService {
     }
 
     public ArrayList<UUID> getInQueue() {
-        return this.getInQueue();
+        return this.inQueue;
     }
 
     public RachamonPixelmonShowdownRuleManager getRuleManager() {
         return this.ruleManager;
     }
 
+    public RachamonPixelmonShowdownEloManager getEloManager() {
+        return eloManager;
+    }
 }
