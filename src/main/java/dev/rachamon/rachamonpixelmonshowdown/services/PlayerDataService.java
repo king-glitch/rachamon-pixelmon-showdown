@@ -64,7 +64,6 @@ public class PlayerDataService {
         this.hasPlayer(uuid, (bool) -> {
 
             if (bool) {
-                this.plugin.getLogger().debug("already got player " + uuid + " in database");
                 this.getPlayer(uuid, callback);
                 return;
             }
@@ -123,7 +122,6 @@ public class PlayerDataService {
                 statement.setString(1, uuid.toString());
                 statement.setString(2, this.leagueName);
                 ResultSet result = statement.executeQuery();
-                this.plugin.getLogger().debug("has player " + uuid + ", " + result.next() + " in database");
                 callback.accept(result.next());
             } catch (Exception e) {
                 e.printStackTrace();

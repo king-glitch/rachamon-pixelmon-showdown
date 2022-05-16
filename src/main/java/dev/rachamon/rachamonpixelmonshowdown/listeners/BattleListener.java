@@ -26,7 +26,6 @@ import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.scheduler.Task;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -55,51 +54,61 @@ public class BattleListener {
         PlayerParticipant participant1 = (PlayerParticipant) playerParticipant1;
         PlayerParticipant participant2 = (PlayerParticipant) playerParticipant2;
 
-        UUID playerUuid1 = participant1.getEntity().getUniqueID();
-        UUID playerUuid2 = participant2.getEntity().getUniqueID();
-        Optional<Player> player1 = Sponge.getServer().getPlayer(playerUuid1);
-        Optional<Player> player2 = Sponge.getServer().getPlayer(playerUuid2);
+        Player _entityPlayerOne = (Player) participant1.getEntity();
+        Player _entityPlayerTwo = (Player) participant2.getEntity();
 
-        if (!player1.isPresent() || !player2.isPresent()) {
-            return;
-        }
+        UUID playerOneUuid = _entityPlayerOne.getUniqueId();
+        UUID playerTwoUuid = _entityPlayerTwo.getUniqueId();
 
-        EntityPlayerMP ePlayer1 = (EntityPlayerMP) player1.get();
-        EntityPlayerMP ePlayer2 = (EntityPlayerMP) player2.get();
+        EntityPlayerMP entityPlayerOne = (EntityPlayerMP) participant1.getEntity();
+        EntityPlayerMP entityPlayerTwo = (EntityPlayerMP) participant2.getEntity();
 
-        if (BattleRegistry.getBattle(ePlayer1) != null) {
-            BattleControllerBase base = BattleRegistry.getBattle(ePlayer1);
+        if (BattleRegistry.getBattle(entityPlayerOne) != null) {
+            BattleControllerBase base = BattleRegistry.getBattle(entityPlayerOne);
             BattleRegistry.deRegisterBattle(base);
         }
 
         RachamonPixelmonShowdownQueueManager queueManager = this.plugin.getQueueManager();
 
-        if (!queueManager.isPlayerInMatch(playerUuid1) || !queueManager.isPlayerInMatch(playerUuid2)) {
+        if (!queueManager.isPlayerInMatch(playerOneUuid) || !queueManager.isPlayerInMatch(playerTwoUuid)) {
+            this.plugin.getLogger().debug("player not in match");
             return;
         }
 
-        QueueService queue = queueManager.getPlayerInMatch(playerUuid1);
+        QueueService queue = queueManager.getPlayerInMatch(playerOneUuid);
 
         if (queue == null) {
+            this.plugin.getLogger().debug("queue is null");
             return;
         }
 
 
         RachamonPixelmonShowdownEloManager eloManager = queue.getEloManager();
 
-        if (!queue.isPlayerInMatch(playerUuid2)) {
+        if (!queue.isPlayerInMatch(playerTwoUuid)) {
+            this.plugin.getLogger().debug("player 2 not in match");
             return;
         }
 
         if (event.abnormal || event.cause == EnumBattleEndCause.FORCE) {
-            this.runPostBattle(event, participant1, playerUuid1, playerUuid2, player1.get(), player2.get(), queue, eloManager);
-        } else {
+
             Task.builder().execute(() -> {
-                this.runPostBattle(event, participant1, playerUuid1, playerUuid2, player1.get(), player2.get(), queue, eloManager);
+                this.runPostBattle(true, event, participant1, playerOneUuid, playerTwoUuid, _entityPlayerOne, _entityPlayerTwo, queue, eloManager);
+
+                if (BattleRegistry.getBattle(entityPlayerOne) != null) {
+                    BattleRegistry.getBattle(entityPlayerOne).endBattle();
+                }
+
+                if (BattleRegistry.getBattle(entityPlayerTwo) != null) {
+                    BattleRegistry.getBattle(entityPlayerTwo).endBattle();
+                }
+
             }).delay(500, TimeUnit.MICROSECONDS).submit(RachamonPixelmonShowdown.getInstance());
+
+            return;
         }
 
-
+        this.runPostBattle(false, event, participant1, playerOneUuid, playerTwoUuid, _entityPlayerOne, _entityPlayerTwo, queue, eloManager);
     }
 
     /**
@@ -153,6 +162,11 @@ public class BattleListener {
 
         QueueService queueService = queueManager.getPlayerInMatch(winnerUuid);
 
+        if (queueService == null) {
+            return;
+        }
+
+
         EntityPlayer ePlayer = (EntityPlayer) winner;
         BattleControllerBase battleControllerBase = BattleRegistry.getBattle(ePlayer);
         List<PlayerParticipant> playerParticipants = battleControllerBase.getPlayers();
@@ -177,12 +191,10 @@ public class BattleListener {
         PlayerEloProfile eloWinnerProfile = eloManager.getProfileData(winnerUuid);
         PlayerEloProfile eloLoserProfile = eloManager.getProfileData(loserUuid);
 
-        this.processElo(winner, winnerUuid, loser, loserUuid, queueService, eloManager, eloWinnerProfile, eloLoserProfile, winner.getName());
-
-
+        this.processElo(winner, winnerUuid, loser, loserUuid, queueService, eloManager, eloWinnerProfile, eloLoserProfile);
     }
 
-    private void processElo(Player winner, UUID winnerUuid, Player loser, UUID loserUuid, QueueService queueService, RachamonPixelmonShowdownEloManager eloManager, PlayerEloProfile eloWinnerProfile, PlayerEloProfile eloLoserProfile, String name) {
+    private void processElo(Player winner, UUID winnerUuid, Player loser, UUID loserUuid, QueueService queueService, RachamonPixelmonShowdownEloManager eloManager, PlayerEloProfile eloWinnerProfile, PlayerEloProfile eloLoserProfile) {
         int winnerElo = eloWinnerProfile.getElo();
         int loserElo = eloLoserProfile.getElo();
 
@@ -200,7 +212,7 @@ public class BattleListener {
                 .getWinMessage()
                 .replaceAll("\\{current}", String.valueOf(winnerElo))
                 .replaceAll("\\{new-elo}", String.valueOf(newWinnerElo))
-                .replaceAll("\\{player}", name));
+                .replaceAll("\\{player}", loser.getName()));
 
         ChatUtil.sendMessage(loser, RachamonPixelmonShowdown
                 .getInstance()
@@ -209,7 +221,7 @@ public class BattleListener {
                 .getLoseMessage()
                 .replaceAll("\\{current}", String.valueOf(loserElo))
                 .replaceAll("\\{new-elo}", String.valueOf(newLoserElo))
-                .replaceAll("\\{player}", name));
+                .replaceAll("\\{player}", winner.getName()));
 
         queueService.removePlayerInMatch(winnerUuid);
         queueService.removePlayerInMatch(loserUuid);
@@ -223,16 +235,26 @@ public class BattleListener {
         eloManager.sort();
     }
 
-    private void runPostBattle(BattleEndEvent event, PlayerParticipant participant1, UUID playerUuid1, UUID playerUuid2, Player player1, Player player2, QueueService queue, RachamonPixelmonShowdownEloManager eloManager) {
+    private void runPostBattle(boolean force, BattleEndEvent event, PlayerParticipant participant1, UUID playerUuid1, UUID playerUuid2, Player player1, Player player2, QueueService queue, RachamonPixelmonShowdownEloManager eloManager) {
+
+        if (event.results.get(participant1) == BattleResults.DRAW) {
+            return;
+        }
+
         boolean isPlayerOneWin = event.results.get(participant1) == BattleResults.VICTORY;
+
+        if (force) {
+            isPlayerOneWin = !Sponge.getServer().getPlayer(playerUuid2).isPresent();
+        }
 
         PlayerEloProfile eloWinner = isPlayerOneWin ? eloManager.getProfileData(playerUuid1) : eloManager.getProfileData(playerUuid2);
         PlayerEloProfile eloLoser = isPlayerOneWin ? eloManager.getProfileData(playerUuid2) : eloManager.getProfileData(playerUuid1);
         Player winner = isPlayerOneWin ? player1 : player2;
         Player loser = isPlayerOneWin ? player2 : player1;
 
+        this.plugin.getLogger().debug(event.results.get(participant1).toString());
 
-        this.processElo(winner, playerUuid1, loser, playerUuid2, queue, eloManager, eloWinner, eloLoser, player1.getName());
+        this.processElo(winner, winner.getUniqueId(), loser, loser.getUniqueId(), queue, eloManager, eloWinner, eloLoser);
     }
 
 }

@@ -45,7 +45,7 @@ public class PixelmonShowdownQueueCommand implements IPlayerCommand, IParameteri
             } else if (interaction.get().equalsIgnoreCase("leaderboard")) {
                 RachamonPixelmonShowdown.getInstance().getMatchMakingManager().leagueLeaderboard(league.get(), source);
             } else if (interaction.get().equalsIgnoreCase("rules")) {
-                RachamonPixelmonShowdown.getInstance().getMatchMakingManager().leagueRules(league.get());
+                RachamonPixelmonShowdown.getInstance().getMatchMakingManager().leagueRules(league.get(), source);
             }
         } catch (Exception e) {
             e.printStackTrace();

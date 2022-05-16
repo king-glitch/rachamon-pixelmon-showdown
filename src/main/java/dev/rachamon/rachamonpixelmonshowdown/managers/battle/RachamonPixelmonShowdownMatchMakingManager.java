@@ -106,23 +106,19 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
         EntityPlayerMP participant1 = (EntityPlayerMP) player1.get();
         EntityPlayerMP participant2 = (EntityPlayerMP) player2.get();
+
         Pokemon[] playerParty1 = Pixelmon.storageManager.getParty(participant1).getAll();
         Pokemon[] playerParty2 = Pixelmon.storageManager.getParty(participant2).getAll();
-        ArrayList<Pokemon> playerPokemonList1 = new ArrayList<>(Arrays.asList((Pokemon[]) Arrays
-                .stream(playerParty1)
-                .filter(Objects::nonNull)
-                .toArray()));
-        ArrayList<Pokemon> playerPokemonList2 = new ArrayList<>(Arrays.asList((Pokemon[]) Arrays
-                .stream(playerParty2)
-                .filter(Objects::nonNull)
-                .toArray()));
+
+        ArrayList<Pokemon> playerPokemonList1 = RachamonPixelmonShowdownMatchMakingManager.filterNotNullPokemonParty(playerParty1);
+        ArrayList<Pokemon> playerPokemonList2 = RachamonPixelmonShowdownMatchMakingManager.filterNotNullPokemonParty(playerParty2);
 
         if (ruleManager.getLeague().getBattleRule().isEnableTeamPreview()) {
             Task.builder().execute(() -> {
                 try {
                     PaginationList.Builder builder = PaginationList
                             .builder()
-                            .title(TextUtil.toText("&6&l" + player1.get().getName() + " Party"))
+                            .title(TextUtil.toText("&6&l" + player2.get().getName() + " Party"))
                             .padding(TextUtil.toText("&8="));
 
 
@@ -135,6 +131,11 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                     }
 
                     builder.contents(contents).sendTo(player1.get());
+                    builder = PaginationList
+                            .builder()
+                            .title(TextUtil.toText("&6&l" + player1.get().getName() + " Party"))
+                            .padding(TextUtil.toText("&8="));
+
                     contents.clear();
 
                     i = 1;
@@ -159,8 +160,20 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                 e.printStackTrace();
             }
         }).delay(prepareTime, TimeUnit.SECONDS).submit(RachamonPixelmonShowdown.getInstance());
+    }
 
+    private static ArrayList<Pokemon> filterNotNullPokemonParty(Pokemon[] pokemons) {
+        ArrayList<Pokemon> playerPokemonList = new ArrayList<>();
 
+        for (Pokemon pokemon : pokemons) {
+            if (pokemon == null) {
+                continue;
+            }
+
+            playerPokemonList.add(pokemon);
+        }
+
+        return playerPokemonList;
     }
 
     /**
@@ -226,17 +239,10 @@ public class RachamonPixelmonShowdownMatchMakingManager {
         }
 
         Pokemon[] playerOnePokemonParty = Pixelmon.storageManager.getParty(participant1).getAll();
-        Pokemon[] playerTwoPokemonParty = Pixelmon.storageManager.getParty(participant1).getAll();
+        Pokemon[] playerTwoPokemonParty = Pixelmon.storageManager.getParty(participant2).getAll();
 
-
-        ArrayList<Pokemon> playerOnePokemonsList = new ArrayList<>(Arrays.asList((Pokemon[]) Arrays
-                .stream(playerOnePokemonParty)
-                .filter(Objects::nonNull)
-                .toArray()));
-        ArrayList<Pokemon> playerTwoPokemonsList = new ArrayList<>(Arrays.asList((Pokemon[]) Arrays
-                .stream(playerTwoPokemonParty)
-                .filter(Objects::nonNull)
-                .toArray()));
+        ArrayList<Pokemon> playerOnePokemonsList = RachamonPixelmonShowdownMatchMakingManager.filterNotNullPokemonParty(playerOnePokemonParty);
+        ArrayList<Pokemon> playerTwoPokemonsList = RachamonPixelmonShowdownMatchMakingManager.filterNotNullPokemonParty(playerTwoPokemonParty);
 
         boolean playerOneSameParty = RachamonPixelmonShowdownMatchMakingManager.isPartySame(playerOnePokemons, playerOnePokemonsList);
         boolean playerTwoSameParty = RachamonPixelmonShowdownMatchMakingManager.isPartySame(playerTwoPokemons, playerTwoPokemonsList);
@@ -250,6 +256,7 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                         .getLanguage()
                         .getGeneralLanguageBattle()
                         .getYourTeamNotSame());
+
                 ChatUtil.sendMessage(playerTwo.get(), RachamonPixelmonShowdown
                         .getInstance()
                         .getLanguage()
@@ -272,6 +279,8 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
             queueService.removePlayerInMatch(uuid1);
             queueService.removePlayerInMatch(uuid2);
+
+            return;
 
         }
 
@@ -409,11 +418,13 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
     private static boolean isPartySame(ArrayList<Pokemon> party1, ArrayList<Pokemon> party2) {
         if (party1.size() != party2.size()) {
+            RachamonPixelmonShowdown.getInstance().getLogger().debug("not same party size");
             return false;
         }
 
         for (Pokemon pokemon : party1) {
             if (!party2.contains(pokemon)) {
+                RachamonPixelmonShowdown.getInstance().getLogger().debug("party pokemon not exist in party 2");
                 return false;
             }
         }
@@ -515,11 +526,6 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                     .getNotInQueue());
         }
 
-        for (UUID uuid : queueService.getInQueue()) {
-            this.plugin.getLogger().debug("in queue: " + uuid);
-        }
-
-
         queueService.removePlayerInQueue(player.getUniqueId());
 
 
@@ -619,7 +625,26 @@ public class RachamonPixelmonShowdownMatchMakingManager {
      *
      * @param leagueName the league name
      */
-    public void leagueRules(String leagueName) {
+    public void leagueRules(String leagueName, Player player) {
+//
+//        PaginationList.Builder builder = PaginationList
+//                .builder()
+//                .title(TextUtil.toText("&6&lBattle Rules"))
+//                .padding(TextUtil.toText("&8="));
+//
+//
+//        List<Text> contents = new ArrayList<>();
+//        int i = 1;
+//        String text = plugin
+//                .getLanguage()
+//                .getGeneralLanguageBattle()
+//                .getLeagueLeaderboardValue()
+//                .replaceAll("\\{rank}", String.valueOf(i))
+//                .replaceAll("\\{elo}", String.valueOf(profile.getElo()));
+//        contents.add(TextUtil.toText(text));
+//
+//        builder.contents(contents).sendTo(player);
+
     }
 
     /**

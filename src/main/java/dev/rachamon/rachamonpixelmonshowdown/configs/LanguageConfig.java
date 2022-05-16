@@ -139,6 +139,17 @@ public class LanguageConfig {
         @Setting(value = "league-stats-value", comment = "stats value info")
         protected List<String> leagueStatsValue = Arrays.asList("", "&2&lElo&8: &a{league-name}", "&2&lElo: &8: &a{elo}", "&2&lWin-rate: &8: &a{win-rate}", "&2&lWins: &8: &a{wins}", "&2&lLoses: &8: &a{loses}", "");
 
+        @Setting(value = "league-battle-rules", comment = "battle rules value info")
+        protected List<String> leagueBattleRules = Arrays.asList(
+                "",
+                "&2&lType&8: &a{type}",
+                "&2&lElo&8: &a{elo}",
+                "&2&lWin-rate&8: &a{win-rate}",
+                "&2&lWins&8: &a{wins}",
+                "&2&lLoses&8: &a{loses}",
+                ""
+        );
+
         /**
          * Gets prefix.
          *

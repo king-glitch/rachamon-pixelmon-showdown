@@ -1,5 +1,6 @@
 package dev.rachamon.rachamonpixelmonshowdown.managers.plugins;
 
+import com.pixelmonmod.pixelmon.Pixelmon;
 import dev.rachamon.api.common.database.MySQLConnectorProvider;
 import dev.rachamon.api.common.database.SQLiteConnectorProvider;
 import dev.rachamon.api.sponge.config.SpongeAPIConfigFactory;
@@ -27,15 +28,15 @@ public class RachamonPixelmonShowdownPluginManager implements IRachamonPluginMan
         this.plugin.setComponents(new RachamonPixelmonShowdown.Components());
         this.plugin.setInjector(this.plugin.getInjector().createChildInjector(new RachamonPixelmonShowdownModule()));
         this.plugin.getInjector().injectMembers(this.plugin.getComponents());
-        Sponge.getEventManager().registerListeners(this.plugin, new BattleListener());
 
+        Pixelmon.EVENT_BUS.register(new BattleListener());
+        Sponge.getEventManager().registerListeners(this.plugin, new BattleListener());
 
         this.plugin.setInitialized(true);
     }
 
     @Override
     public void preInitialize() {
-
     }
 
     @Override
@@ -73,15 +74,12 @@ public class RachamonPixelmonShowdownPluginManager implements IRachamonPluginMan
 
     @Override
     public void start() {
-
     }
 
     @Override
     public void reload() {
         this.registerConfigs();
         this.registerCommands();
-
-
     }
 
     private void registerConfigs() {
