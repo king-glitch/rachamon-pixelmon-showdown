@@ -83,9 +83,16 @@ public class RachamonPixelmonShowdownMatchMakingManager {
             return;
         }
 
-        int prepareTime = RachamonPixelmonShowdown.getInstance().getConfig()
-
-                                                  .getQueueManagementCategorySetting().getBattlePreparationTime();
+        int prepareTime = RachamonPixelmonShowdown
+                .getInstance()
+                .getConfig()
+                .getQueueManagementCategorySetting()
+                .getBattlePreparationTime();
+        int warmupTime = RachamonPixelmonShowdown
+                .getInstance()
+                .getConfig()
+                .getQueueManagementCategorySetting()
+                .getTeamPreviewTime();
 
         String preMatchMessage = RachamonPixelmonShowdown
                 .getInstance()
@@ -111,16 +118,48 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                 .toArray()));
 
         if (ruleManager.getLeague().getBattleRule().isEnableTeamPreview()) {
-            // TODO: add chat team preview
+            Task.builder().execute(() -> {
+                try {
+                    PaginationList.Builder builder = PaginationList
+                            .builder()
+                            .title(TextUtil.toText("&6&l" + player1.get().getName() + " Party"))
+                            .padding(TextUtil.toText("&8="));
+
+
+                    List<Text> contents = new ArrayList<>();
+                    int i = 1;
+
+                    for (Pokemon pokemon : playerPokemonList2) {
+                        contents.add(TextUtil.toText(i + ". " + pokemon.getSpecies()));
+                        i++;
+                    }
+
+                    builder.contents(contents).sendTo(player1.get());
+                    contents.clear();
+
+                    i = 1;
+                    for (Pokemon pokemon : playerPokemonList1) {
+                        contents.add(TextUtil.toText(i + ". " + pokemon.getSpecies()));
+                        i++;
+                    }
+
+                    builder.contents(contents).sendTo(player2.get());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).delay(prepareTime - warmupTime, TimeUnit.SECONDS).submit(RachamonPixelmonShowdown.getInstance());
+
+
         }
 
-        Task start = Task.builder().execute(() -> {
+        Task.builder().execute(() -> {
             try {
                 RachamonPixelmonShowdownMatchMakingManager.startBattle(playerUuid1, playerPokemonList1, null, playerUuid2, playerPokemonList2, null, ruleManager);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }).delay(prepareTime, TimeUnit.SECONDS).submit(RachamonPixelmonShowdown.getInstance());
+
 
     }
 
@@ -592,10 +631,7 @@ public class RachamonPixelmonShowdownMatchMakingManager {
      */
     public void enterQueue(String leagueName, Player player) throws Exception {
 
-        if (RachamonPixelmonShowdown
-                .getInstance()
-                .getQueueManager()
-                .isPlayerInAction(player.getUniqueId())) {
+        if (RachamonPixelmonShowdown.getInstance().getQueueManager().isPlayerInAction(player.getUniqueId())) {
             throw new Exception(RachamonPixelmonShowdown
                     .getInstance()
                     .getLanguage()
