@@ -122,4 +122,7 @@ public class RachamonPixelmonShowdownEloManager {
         return this.cache.containsKey(uuid);
     }
 
+    public ArrayList<UUID> getRanks() {
+        return ranks;
+    }
 }

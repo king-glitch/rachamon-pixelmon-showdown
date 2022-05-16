@@ -142,12 +142,17 @@ public class LanguageConfig {
         @Setting(value = "league-battle-rules", comment = "battle rules value info")
         protected List<String> leagueBattleRules = Arrays.asList(
                 "",
-                "&2&lType&8: &a{type}",
-                "&2&lElo&8: &a{elo}",
-                "&2&lWin-rate&8: &a{win-rate}",
-                "&2&lWins&8: &a{wins}",
-                "&2&lLoses&8: &a{loses}",
+                "&2&lBattle Type&8: &a{type}",
+                "&2&lLevel Capacity&8: &a{level-capacity}",
+                "&2&lRaise level to capacity&8: &a{raise-cap}",
+                "&2&lTeam Preview&8: &a{team-preview}",
+                "&2&lTurn Time&8: &a{turn-time}",
+                "&2&lPokemon banned&8: &8[&chover&8]",
+                "&2&lMove banned&8: &8[&chover&8]",
+                "&2&lAbility banned&8: &8[&chover&8]",
+                "&2&lItem banned&8: &8[&chover&8]",
                 ""
+
         );
 
         /**
@@ -328,6 +333,10 @@ public class LanguageConfig {
          */
         public List<String> getLeagueStatsValue() {
             return leagueStatsValue;
+        }
+
+        public List<String> getLeagueBattleRules() {
+            return leagueBattleRules;
         }
     }
 

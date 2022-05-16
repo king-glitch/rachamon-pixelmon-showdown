@@ -1,6 +1,5 @@
 package dev.rachamon.rachamonpixelmonshowdown.managers.battle;
 
-import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 import com.pixelmonmod.pixelmon.battles.rules.BattleRules;
 import com.pixelmonmod.pixelmon.battles.rules.clauses.*;
 import com.pixelmonmod.pixelmon.entities.npcs.registry.PokemonForm;
@@ -339,6 +338,7 @@ public class RachamonPixelmonShowdownRuleManager {
         battleRules.numPokemon = this.league.getBattleRule().getPokemonAmount();
 
         List<BattleClause> clauses = battleRules.getClauseList();
+
         if (this.league.getBattleRule().isBagBanned()) {
             clauses.add(new BattleClause("bag"));
         }
@@ -352,26 +352,6 @@ public class RachamonPixelmonShowdownRuleManager {
         return this;
 
     }
-
-    /**
-     * Validate list.
-     *
-     * @param team the team
-     * @return the list
-     */
-    public List<BattleClause> validate(List<Pokemon> team) {
-        List<BattleClause> clauseList = battleRules.getClauseList();
-        List<BattleClause> caughtClauses = new ArrayList<>();
-        for (BattleClause clause : clauseList) {
-            if (!clause.validateTeam(team)) {
-                continue;
-            }
-
-            caughtClauses.add(clause);
-        }
-        return caughtClauses;
-    }
-
 
     /**
      * Gets battle rules.

@@ -8,6 +8,7 @@ import com.pixelmonmod.pixelmon.battles.rules.BattleRules;
 import com.pixelmonmod.pixelmon.entities.pixelmon.EntityPixelmon;
 import dev.rachamon.api.sponge.util.TextUtil;
 import dev.rachamon.rachamonpixelmonshowdown.RachamonPixelmonShowdown;
+import dev.rachamon.rachamonpixelmonshowdown.configs.BattleLeagueConfig;
 import dev.rachamon.rachamonpixelmonshowdown.services.QueueService;
 import dev.rachamon.rachamonpixelmonshowdown.structures.PlayerEloProfile;
 import dev.rachamon.rachamonpixelmonshowdown.utils.ChatUtil;
@@ -480,7 +481,6 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                 toRemove.add(opponent);
                 toRemove.add(uuid);
                 RachamonPixelmonShowdownMatchMakingManager.startPreBattle(uuid, opponent, queue.getRuleManager());
-
             }
         }
 
@@ -598,7 +598,10 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
         List<Text> contents = new ArrayList<>();
         int i = 1;
-        for (PlayerEloProfile profile : eloManager.getCache().values()) {
+        for (UUID uuid : eloManager.getRanks()) {
+
+            PlayerEloProfile profile = eloManager.getProfileData(uuid);
+
             String text = plugin
                     .getLanguage()
                     .getGeneralLanguageBattle()
@@ -608,7 +611,7 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                             .requireNonNull(Objects.requireNonNull(Sponge
                                     .getServiceManager()
                                     .provide(UserStorageService.class)
-                                    .flatMap(storage -> storage.get(profile.getUuid()))
+                                    .flatMap(storage -> storage.get(uuid))
                                     .orElse(null)))
                             .getName())
                     .replaceAll("\\{elo}", String.valueOf(profile.getElo()));
@@ -625,25 +628,31 @@ public class RachamonPixelmonShowdownMatchMakingManager {
      *
      * @param leagueName the league name
      */
-    public void leagueRules(String leagueName, Player player) {
-//
-//        PaginationList.Builder builder = PaginationList
-//                .builder()
-//                .title(TextUtil.toText("&6&lBattle Rules"))
-//                .padding(TextUtil.toText("&8="));
-//
-//
-//        List<Text> contents = new ArrayList<>();
-//        int i = 1;
-//        String text = plugin
-//                .getLanguage()
-//                .getGeneralLanguageBattle()
-//                .getLeagueLeaderboardValue()
-//                .replaceAll("\\{rank}", String.valueOf(i))
-//                .replaceAll("\\{elo}", String.valueOf(profile.getElo()));
-//        contents.add(TextUtil.toText(text));
-//
-//        builder.contents(contents).sendTo(player);
+    public void leagueRules(String leagueName, Player player) throws Exception {
+
+        QueueService queueService = RachamonPixelmonShowdown.getInstance().getQueueManager().findQueue(leagueName);
+
+        BattleLeagueConfig.BattleRule rules = queueService.getRuleManager().getLeague().getBattleRule();
+
+        PaginationList.Builder builder = PaginationList
+                .builder()
+                .title(TextUtil.toText("&6&lBattle Rules"))
+                .padding(TextUtil.toText("&8="));
+
+
+        List<Text> contents = new ArrayList<>();
+        for (String text : this.plugin.getLanguage().getGeneralLanguageBattle().getLeagueBattleRules()) {
+            text = text
+                    .replaceAll("\\{type}", rules.isDoubleBattle() ? "Double" : "Single" + "")
+                    .replaceAll("\\{level-capacity}", rules.getLevelCapacity() + "")
+                    .replaceAll("\\{raise-cap}", rules.isRaiseMaxLevel() ? "Yes" : "No" + "")
+                    .replaceAll("\\{team-preview}", rules.isEnableTeamPreview() ? "Yes" : "No" + "")
+                    .replaceAll("\\{turn-time}", rules.getTurnTime() + " seconds.");
+
+            contents.add(TextUtil.toText(text));
+        }
+
+        builder.contents(contents).sendTo(player);
 
     }
 

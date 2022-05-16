@@ -227,7 +227,11 @@ public class BattleListener {
         queueService.removePlayerInMatch(loserUuid);
 
         eloWinnerProfile.setElo(newWinnerElo);
+        eloWinnerProfile.setWin(eloWinnerProfile.getWin() + 1);
+
         eloLoserProfile.setElo(newLoserElo);
+        eloLoserProfile.setLose(eloLoserProfile.getLose() + 1);
+
 
         eloManager.updatePlayer(winnerUuid, eloWinnerProfile);
         eloManager.updatePlayer(loserUuid, eloLoserProfile);
@@ -252,7 +256,6 @@ public class BattleListener {
         Player winner = isPlayerOneWin ? player1 : player2;
         Player loser = isPlayerOneWin ? player2 : player1;
 
-        this.plugin.getLogger().debug(event.results.get(participant1).toString());
 
         this.processElo(winner, winner.getUniqueId(), loser, loser.getUniqueId(), queue, eloManager, eloWinner, eloLoser);
     }
