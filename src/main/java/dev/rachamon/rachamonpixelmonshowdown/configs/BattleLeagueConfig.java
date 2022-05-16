@@ -1,6 +1,6 @@
 package dev.rachamon.rachamonpixelmonshowdown.configs;
 
-import info.pixelmon.repack.ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
 import javax.annotation.Nullable;
@@ -38,6 +38,7 @@ public class BattleLeagueConfig {
     /**
      * The type League.
      */
+    @ConfigSerializable
     public static class League {
 
         /**
@@ -154,6 +155,7 @@ public class BattleLeagueConfig {
     /**
      * The type Battle rule.
      */
+    @ConfigSerializable
     public static class BattleRule {
         /**
          * Instantiates a new Battle rule.
@@ -301,6 +303,7 @@ public class BattleLeagueConfig {
     /**
      * The type Complex claus.
      */
+    @ConfigSerializable
     public static class ComplexClaus {
         /**
          * Instantiates a new Complex claus.

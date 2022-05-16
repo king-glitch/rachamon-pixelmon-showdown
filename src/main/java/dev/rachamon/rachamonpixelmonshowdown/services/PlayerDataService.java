@@ -221,7 +221,7 @@ public class PlayerDataService {
             Map<UUID, PlayerEloProfile> players = new HashMap<>();
             try (PreparedStatement statement = connection.prepareStatement(SQL)) {
                 statement.setString(1, leagueName);
-                ResultSet result = statement.executeQuery(SQL);
+                ResultSet result = statement.executeQuery();
                 while (result.next()) {
                     String _uuid = result.getString("uuid");
                     int elo = result.getInt("elo");
