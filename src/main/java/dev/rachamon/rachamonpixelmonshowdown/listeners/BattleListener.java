@@ -10,6 +10,7 @@ import com.pixelmonmod.pixelmon.enums.battle.EnumBattleEndCause;
 import dev.rachamon.rachamonpixelmonshowdown.RachamonPixelmonShowdown;
 import dev.rachamon.rachamonpixelmonshowdown.managers.battle.RachamonPixelmonShowdownEloManager;
 import dev.rachamon.rachamonpixelmonshowdown.managers.battle.RachamonPixelmonShowdownQueueManager;
+import dev.rachamon.rachamonpixelmonshowdown.services.BattleLogDataService;
 import dev.rachamon.rachamonpixelmonshowdown.services.QueueService;
 import dev.rachamon.rachamonpixelmonshowdown.structures.PlayerEloProfile;
 import dev.rachamon.rachamonpixelmonshowdown.utils.BattleUtil;
@@ -29,10 +30,18 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * The type Battle listener.
+ */
 public class BattleListener {
 
     private final RachamonPixelmonShowdown plugin = RachamonPixelmonShowdown.getInstance();
 
+    /**
+     * On battle end.
+     *
+     * @param event the event
+     */
     @SubscribeEvent
     public void onBattleEnd(BattleEndEvent event) {
 
@@ -75,6 +84,7 @@ public class BattleListener {
             return;
         }
 
+
         RachamonPixelmonShowdownEloManager eloManager = queue.getEloManager();
 
         if (!queue.isPlayerInMatch(playerUuid2)) {
@@ -92,6 +102,11 @@ public class BattleListener {
 
     }
 
+    /**
+     * On player quit.
+     *
+     * @param event the event
+     */
     @Listener
     public void onPlayerQuit(ClientConnectionEvent.Disconnect event) {
         RachamonPixelmonShowdownQueueManager queueManager = RachamonPixelmonShowdown.getInstance().getQueueManager();
@@ -101,9 +116,19 @@ public class BattleListener {
             return;
         }
 
-        queueManager.getPlayerInAction(uuid).resetPlayer(uuid);
+        QueueService queueService = queueManager.getPlayerInAction(uuid);
+        if (queueService == null) {
+            return;
+        }
+
+        queueService.resetPlayer(uuid);
     }
 
+    /**
+     * On command send.
+     *
+     * @param event the event
+     */
     @Listener
     public void onCommandSend(SendCommandEvent event) {
         if (!event.getCommand().equalsIgnoreCase("endbattle")) {
@@ -164,6 +189,10 @@ public class BattleListener {
         int newWinnerElo = BattleUtil.calculateWinElo(winnerElo, loserElo);
         int newLoserElo = BattleUtil.calculateLoseElo(loserElo, winnerElo);
 
+        BattleLogDataService.addLog(winner.getUniqueId(), loser.getUniqueId(), Math.abs(newWinnerElo - winnerElo), Math.abs(loserElo - newLoserElo), queueService
+                .getRuleManager()
+                .getLeagueName());
+
         ChatUtil.sendMessage(winner, RachamonPixelmonShowdown
                 .getInstance()
                 .getLanguage()
@@ -201,6 +230,7 @@ public class BattleListener {
         PlayerEloProfile eloLoser = isPlayerOneWin ? eloManager.getProfileData(playerUuid2) : eloManager.getProfileData(playerUuid1);
         Player winner = isPlayerOneWin ? player1 : player2;
         Player loser = isPlayerOneWin ? player2 : player1;
+
 
         this.processElo(winner, playerUuid1, loser, playerUuid2, queue, eloManager, eloWinner, eloLoser, player1.getName());
     }

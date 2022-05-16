@@ -23,15 +23,18 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * The type Rachamon pixelmon showdown match making manager.
+ */
 public class RachamonPixelmonShowdownMatchMakingManager {
 
     private final RachamonPixelmonShowdown plugin = RachamonPixelmonShowdown.getInstance();
-    private final static RachamonPixelmonShowdownQueueManager queueManager = RachamonPixelmonShowdown
-            .getInstance()
-            .getQueueManager();
     private static boolean isRunning = false;
     private static Task matchMaker;
 
+    /**
+     * Run task.
+     */
     public static void runTask() {
         if (RachamonPixelmonShowdownMatchMakingManager.isRunning) {
             return;
@@ -44,7 +47,7 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                 .interval(RachamonPixelmonShowdown
                         .getInstance()
                         .getConfig()
-                        .getRoot()
+
                         .getQueueManagementCategorySetting()
                         .getMatchMakerTimer(), TimeUnit.SECONDS)
                 .submit(RachamonPixelmonShowdown.getInstance());
@@ -53,7 +56,7 @@ public class RachamonPixelmonShowdownMatchMakingManager {
     private static void matchMake() {
         AtomicBoolean continueMatching = new AtomicBoolean(false);
 
-        queueManager.getQueue().forEach((k, v) -> {
+        RachamonPixelmonShowdown.getInstance().getQueueManager().getQueue().forEach((k, v) -> {
             if (v.getInQueue().size() >= 2) {
                 RachamonPixelmonShowdownMatchMakingManager.findMatch(v);
                 continueMatching.set(true);
@@ -65,6 +68,13 @@ public class RachamonPixelmonShowdownMatchMakingManager {
         }
     }
 
+    /**
+     * Start pre battle.
+     *
+     * @param playerUuid1 the player uuid 1
+     * @param playerUuid2 the player uuid 2
+     * @param ruleManager the rule manager
+     */
     public static void startPreBattle(UUID playerUuid1, UUID playerUuid2, RachamonPixelmonShowdownRuleManager ruleManager) {
         Optional<Player> player1 = Sponge.getServer().getPlayer(playerUuid1);
         Optional<Player> player2 = Sponge.getServer().getPlayer(playerUuid2);
@@ -73,12 +83,9 @@ public class RachamonPixelmonShowdownMatchMakingManager {
             return;
         }
 
-        int prepareTime = RachamonPixelmonShowdown
-                .getInstance()
-                .getConfig()
-                .getRoot()
-                .getQueueManagementCategorySetting()
-                .getBattlePreparationTime();
+        int prepareTime = RachamonPixelmonShowdown.getInstance().getConfig()
+
+                                                  .getQueueManagementCategorySetting().getBattlePreparationTime();
 
         String preMatchMessage = RachamonPixelmonShowdown
                 .getInstance()
@@ -117,9 +124,24 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
     }
 
+    /**
+     * Start battle.
+     *
+     * @param uuid1                   the uuid 1
+     * @param playerOnePokemons       the player one pokemons
+     * @param playerOneStarterPokemon the player one starter pokemon
+     * @param uuid2                   the uuid 2
+     * @param playerTwoPokemons       the player two pokemons
+     * @param playerTwoStarterPokemon the player two starter pokemon
+     * @param ruleManager             the rule manager
+     * @throws Exception the exception
+     */
     public static void startBattle(UUID uuid1, ArrayList<Pokemon> playerOnePokemons, Pokemon playerOneStarterPokemon, UUID uuid2, ArrayList<Pokemon> playerTwoPokemons, Pokemon playerTwoStarterPokemon, RachamonPixelmonShowdownRuleManager ruleManager) throws Exception {
 
-        QueueService queueService = queueManager.findQueue(ruleManager.getLeagueName());
+        QueueService queueService = RachamonPixelmonShowdown
+                .getInstance()
+                .getQueueManager()
+                .findQueue(ruleManager.getLeagueName());
         queueService.addPlayerInMatch(uuid1);
         queueService.addPlayerInMatch(uuid2);
 
@@ -360,6 +382,11 @@ public class RachamonPixelmonShowdownMatchMakingManager {
         return true;
     }
 
+    /**
+     * Find match.
+     *
+     * @param queue the queue
+     */
     public static void findMatch(QueueService queue) {
         ArrayList<UUID> toRemove = new ArrayList<>();
         ArrayList<UUID> inQueue = queue.getInQueue();
@@ -390,7 +417,6 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                 if (matchValue <= RachamonPixelmonShowdown
                         .getInstance()
                         .getConfig()
-                        .getRoot()
                         .getQueueManagementCategorySetting()
                         .getMatchThresholdValue() && (matchValue <= lowestMatchValue || lowestMatchValue == -1)) {
 
@@ -414,6 +440,9 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
     }
 
+    /**
+     * Stop task.
+     */
     public static void stopTask() {
         if (!RachamonPixelmonShowdownMatchMakingManager.isRunning) {
             return;
@@ -424,9 +453,20 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
     }
 
+    /**
+     * Leave queue.
+     *
+     * @param leagueName the league name
+     * @param player     the player
+     * @throws Exception the exception
+     */
     public void leaveQueue(String leagueName, Player player) throws Exception {
 
-        QueueService queueService = RachamonPixelmonShowdownMatchMakingManager.queueManager.getPlayerInQueue(player.getUniqueId());
+        QueueService queueService = RachamonPixelmonShowdown
+                .getInstance()
+                .getQueueManager()
+                .getPlayerInQueue(player.getUniqueId());
+
 
         if (queueService == null) {
             throw new Exception(RachamonPixelmonShowdown
@@ -434,6 +474,10 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                     .getLanguage()
                     .getGeneralLanguageBattle()
                     .getNotInQueue());
+        }
+
+        for (UUID uuid : queueService.getInQueue()) {
+            this.plugin.getLogger().debug("in queue: " + uuid);
         }
 
 
@@ -449,9 +493,16 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
     }
 
+    /**
+     * League stats.
+     *
+     * @param leagueName the league name
+     * @param player     the player
+     * @throws Exception the exception
+     */
     public void leagueStats(String leagueName, Player player) throws Exception {
 
-        QueueService queueService = RachamonPixelmonShowdownMatchMakingManager.queueManager.findQueue(leagueName);
+        QueueService queueService = RachamonPixelmonShowdown.getInstance().getQueueManager().findQueue(leagueName);
         RachamonPixelmonShowdownEloManager eloManager = queueService.getEloManager();
         PlayerEloProfile profile = eloManager.getProfileData(player.getUniqueId());
         int wins = profile.getWin();
@@ -469,6 +520,7 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
         for (String text : this.plugin.getLanguage().getGeneralLanguageBattle().getLeagueStatsValue()) {
             text = text
+                    .replaceAll("\\{league-name}", leagueName + "")
                     .replaceAll("\\{win-rate}", winRate + "")
                     .replaceAll("\\{wins}", wins + "")
                     .replaceAll("\\{loses}", loses + "")
@@ -479,9 +531,16 @@ public class RachamonPixelmonShowdownMatchMakingManager {
         builder.contents(contents).sendTo(player);
     }
 
+    /**
+     * League leaderboard.
+     *
+     * @param leagueName the league name
+     * @param player     the player
+     * @throws Exception the exception
+     */
     public void leagueLeaderboard(String leagueName, Player player) throws Exception {
 
-        QueueService queueService = RachamonPixelmonShowdownMatchMakingManager.queueManager.findQueue(leagueName);
+        QueueService queueService = RachamonPixelmonShowdown.getInstance().getQueueManager().findQueue(leagueName);
 
         RachamonPixelmonShowdownEloManager eloManager = queueService.getEloManager();
 
@@ -516,12 +575,27 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
     }
 
+    /**
+     * League rules.
+     *
+     * @param leagueName the league name
+     */
     public void leagueRules(String leagueName) {
     }
 
+    /**
+     * Enter queue.
+     *
+     * @param leagueName the league name
+     * @param player     the player
+     * @throws Exception the exception
+     */
     public void enterQueue(String leagueName, Player player) throws Exception {
 
-        if (RachamonPixelmonShowdownMatchMakingManager.queueManager.isPlayerInMatch(player.getUniqueId()) || RachamonPixelmonShowdownMatchMakingManager.queueManager.isPlayerInPreMatch(player.getUniqueId())) {
+        if (RachamonPixelmonShowdown
+                .getInstance()
+                .getQueueManager()
+                .isPlayerInAction(player.getUniqueId())) {
             throw new Exception(RachamonPixelmonShowdown
                     .getInstance()
                     .getLanguage()
@@ -532,10 +606,11 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
         EntityPlayerMP participant = (EntityPlayerMP) player;
 
-        Pokemon[] party = (Pokemon[]) Arrays
+        Pokemon[] party = Arrays
                 .stream(Pixelmon.storageManager.getParty(participant).getAll())
                 .filter(Objects::nonNull)
-                .toArray();
+                .toArray(Pokemon[]::new);
+
         ArrayList<Pokemon> pokemonArrayList = new ArrayList<>(Arrays.asList(party));
 
         QueueService queueService = this.plugin.getQueueManager().findQueue(leagueName);
@@ -556,7 +631,11 @@ public class RachamonPixelmonShowdownMatchMakingManager {
             return;
         }
 
-        queueService.addPlayerInQueue(participant.getUniqueID());
+        queueService.addPlayerInQueue(player.getUniqueId());
+
+        for (UUID uuid : queueService.getInQueue()) {
+            this.plugin.getLogger().debug("enter in queue: " + uuid);
+        }
 
         RachamonPixelmonShowdownMatchMakingManager.runTask();
 

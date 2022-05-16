@@ -16,8 +16,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type Rachamon pixelmon showdown rule manager.
+ */
 public class RachamonPixelmonShowdownRuleManager {
 
+    /**
+     * The Plugin.
+     */
     public final RachamonPixelmonShowdown plugin = RachamonPixelmonShowdown.getInstance();
 
     private final BattleRules battleRules = new BattleRules();
@@ -30,6 +36,12 @@ public class RachamonPixelmonShowdownRuleManager {
     private final List<AbilityClause> abilityClauses = new ArrayList<>();
     private final List<BattleClauseAll> complexClauses = new ArrayList<>();
 
+    /**
+     * Instantiates a new Rachamon pixelmon showdown rule manager.
+     *
+     * @param leagueName the league name
+     * @throws Exception the exception
+     */
     public RachamonPixelmonShowdownRuleManager(String leagueName) throws Exception {
 
         this.leagueName = leagueName;
@@ -85,6 +97,12 @@ public class RachamonPixelmonShowdownRuleManager {
         return new PokemonClause(pokemonName, EnumSpecies.getFromNameAnyCase(pokemonName));
     }
 
+    /**
+     * Gets held item clause.
+     *
+     * @param itemName the item name
+     * @return the held item clause
+     */
     public ItemPreventClause getHeldItemClause(String itemName) {
         try {
             if (itemName.equalsIgnoreCase("megastone")) {
@@ -104,6 +122,11 @@ public class RachamonPixelmonShowdownRuleManager {
         return null;
     }
 
+    /**
+     * Add complex clause.
+     *
+     * @param claus the claus
+     */
     public void addComplexClause(BattleLeagueConfig.ComplexClaus claus) {
 
         ArrayList<BattleClause> complexClause = new ArrayList<>();
@@ -146,6 +169,12 @@ public class RachamonPixelmonShowdownRuleManager {
         complexClauses.add(comboClause);
     }
 
+    /**
+     * Gets ability clause.
+     *
+     * @param abilityName the ability name
+     * @return the ability clause
+     */
     public AbilityClause getAbilityClause(String abilityName) {
 
         Optional<AbilityBase> abilityBase = AbilityBase.getAbility(abilityName);
@@ -158,6 +187,12 @@ public class RachamonPixelmonShowdownRuleManager {
         return new AbilityClause(abilityName, abilityBase.get().getClass());
     }
 
+    /**
+     * Gets move clause.
+     *
+     * @param moveName the move name
+     * @return the move clause
+     */
     public MoveClause getMoveClause(String moveName) {
         try {
             return new MoveClause(moveName, moveName);
@@ -168,6 +203,11 @@ public class RachamonPixelmonShowdownRuleManager {
         return null;
     }
 
+    /**
+     * Add pokemon clause.
+     *
+     * @param pokemonName the pokemon name
+     */
     public void addPokemonClause(String pokemonName) {
         if (pokemonName.equalsIgnoreCase("legendary")) {
             for (EnumSpecies legendary : EnumSpecies.LEGENDARY_ENUMS) {
@@ -202,6 +242,11 @@ public class RachamonPixelmonShowdownRuleManager {
         pokemonClauses.add(clause);
     }
 
+    /**
+     * Add held item clause.
+     *
+     * @param itemName the item name
+     */
     public void addHeldItemClause(String itemName) {
         ItemPreventClause clause = this.getHeldItemClause(itemName);
         if (clause == null) {
@@ -212,6 +257,11 @@ public class RachamonPixelmonShowdownRuleManager {
         this.itemPreventClauses.add(clause);
     }
 
+    /**
+     * Add move clause.
+     *
+     * @param moveName the move name
+     */
     public void addMoveClause(String moveName) {
         MoveClause clause = this.getMoveClause(moveName);
 
@@ -223,6 +273,11 @@ public class RachamonPixelmonShowdownRuleManager {
         this.moveClauses.add(clause);
     }
 
+    /**
+     * Add ability clause.
+     *
+     * @param abilityName the ability name
+     */
     public void addAbilityClause(String abilityName) {
         AbilityClause clause = this.getAbilityClause(abilityName);
 
@@ -234,6 +289,11 @@ public class RachamonPixelmonShowdownRuleManager {
         this.abilityClauses.add(clause);
     }
 
+    /**
+     * Load rachamon pixelmon showdown rule manager.
+     *
+     * @return the rachamon pixelmon showdown rule manager
+     */
     public RachamonPixelmonShowdownRuleManager load() {
 
         for (String pokemon : this.league.getPokemonClaus()) {
@@ -260,6 +320,11 @@ public class RachamonPixelmonShowdownRuleManager {
 
     }
 
+    /**
+     * Build rachamon pixelmon showdown rule manager.
+     *
+     * @return the rachamon pixelmon showdown rule manager
+     */
     public RachamonPixelmonShowdownRuleManager build() {
         BattleRules battleRules = new BattleRules();
 
@@ -288,6 +353,12 @@ public class RachamonPixelmonShowdownRuleManager {
 
     }
 
+    /**
+     * Validate list.
+     *
+     * @param team the team
+     * @return the list
+     */
     public List<BattleClause> validate(List<Pokemon> team) {
         List<BattleClause> clauseList = battleRules.getClauseList();
         List<BattleClause> caughtClauses = new ArrayList<>();
@@ -302,14 +373,29 @@ public class RachamonPixelmonShowdownRuleManager {
     }
 
 
+    /**
+     * Gets battle rules.
+     *
+     * @return the battle rules
+     */
     public BattleRules getBattleRules() {
         return battleRules;
     }
 
+    /**
+     * Gets league.
+     *
+     * @return the league
+     */
     public BattleLeagueConfig.League getLeague() {
         return league;
     }
 
+    /**
+     * Gets league name.
+     *
+     * @return the league name
+     */
     public String getLeagueName() {
         return leagueName;
     }

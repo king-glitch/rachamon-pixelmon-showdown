@@ -11,7 +11,6 @@ import dev.rachamon.api.sponge.provider.RachamonSpongePluginProvider;
 import dev.rachamon.rachamonpixelmonshowdown.configs.BattleLeagueConfig;
 import dev.rachamon.rachamonpixelmonshowdown.configs.LanguageConfig;
 import dev.rachamon.rachamonpixelmonshowdown.configs.MainConfig;
-import dev.rachamon.rachamonpixelmonshowdown.managers.battle.RachamonPixelmonShowdownBattleManager;
 import dev.rachamon.rachamonpixelmonshowdown.managers.battle.RachamonPixelmonShowdownMatchMakingManager;
 import dev.rachamon.rachamonpixelmonshowdown.managers.battle.RachamonPixelmonShowdownQueueManager;
 import dev.rachamon.rachamonpixelmonshowdown.managers.plugins.RachamonPixelmonShowdownPluginManager;
@@ -31,38 +30,44 @@ import org.spongepowered.api.plugin.PluginContainer;
 
 import java.nio.file.Path;
 
+/**
+ * The type Rachamon pixelmon showdown.
+ */
 @Plugin(id = "rachamonpixelmonshowdown", name = RachamonPixelmonShowdown.PLUGIN_NAME, dependencies = {@Dependency(id = "after:pixelmon")})
 public class RachamonPixelmonShowdown extends RachamonSpongePluginProvider implements IRachamonPlugin {
 
+    /**
+     * The constant PLUGIN_NAME.
+     */
     public static final String PLUGIN_NAME = "RachamonPixelmonShowdown";
-
-    // injects
     @Inject
     private Game game;
     @Inject
     private GuiceObjectMapperFactory factory;
-    @Inject
-    private Injector injector;
-    @Inject
-    private Injector pluginInjector;
     @Inject
     private PluginContainer container;
     @Inject
     @ConfigDir(sharedRoot = false)
     private Path directory;
 
+    @Inject
+    private Injector injector;
     private static RachamonPixelmonShowdown instance;
-    private Components components;
     private RachamonPixelmonShowdownPluginManager pluginManager;
+    private Components components;
+    private IDatabaseConnector databaseConnector;
     private SpongeAPIConfigFactory<RachamonPixelmonShowdown, MainConfig> config;
     private SpongeAPIConfigFactory<RachamonPixelmonShowdown, LanguageConfig> language;
     private SpongeAPIConfigFactory<RachamonPixelmonShowdown, BattleLeagueConfig> league;
 
-    private IDatabaseConnector databaseConnector;
+
     private boolean isInitialized = false;
 
+    /**
+     * Instantiates a new Rachamon pixelmon showdown.
+     */
     public RachamonPixelmonShowdown() {
-        super(RachamonPixelmonShowdown.PLUGIN_NAME, Sponge.getServer());
+        super(PLUGIN_NAME, Sponge.getServer());
     }
 
     @Override
@@ -105,28 +110,11 @@ public class RachamonPixelmonShowdown extends RachamonSpongePluginProvider imple
         this.isInitialized = isInitialized;
     }
 
-    @Override
-    public Injector getPluginInjector() {
-        return this.pluginInjector;
-    }
-
-    @Override
-    public Injector getSpongeInjector() {
-        return this.injector;
-    }
-
-    public void setPluginInjector(Injector injector) {
-        this.pluginInjector = injector;
-    }
-
-    public void setComponents(Components components) {
-        this.components = components;
-    }
-
-    public Components getComponents() {
-        return this.components;
-    }
-
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
     public static RachamonPixelmonShowdown getInstance() {
         return RachamonPixelmonShowdown.instance;
     }
@@ -140,7 +128,7 @@ public class RachamonPixelmonShowdown extends RachamonSpongePluginProvider imple
     public void onPreInitialize(GamePreInitializationEvent event) {
         instance = this;
         this.pluginManager = new RachamonPixelmonShowdownPluginManager();
-        this.getLogger().info("On Pre Initialize RachamonTextureToken...");
+        this.getLogger().info("On Pre Initialize RachamonPixelmonShowdown...");
     }
 
     /**
@@ -182,8 +170,8 @@ public class RachamonPixelmonShowdown extends RachamonSpongePluginProvider imple
      *
      * @return the config
      */
-    public SpongeAPIConfigFactory<RachamonPixelmonShowdown, MainConfig> getConfig() {
-        return this.config;
+    public MainConfig getConfig() {
+        return this.config.getRoot();
     }
 
     /**
@@ -195,18 +183,38 @@ public class RachamonPixelmonShowdown extends RachamonSpongePluginProvider imple
         this.config.setClazz(config);
     }
 
+    /**
+     * Sets main config.
+     *
+     * @param config the config
+     */
     public void setMainConfig(SpongeAPIConfigFactory<RachamonPixelmonShowdown, MainConfig> config) {
         this.config = config;
     }
 
+    /**
+     * Sets battle league config.
+     *
+     * @param league the league
+     */
     public void setBattleLeagueConfig(BattleLeagueConfig league) {
         this.league.setClazz(league);
     }
 
+    /**
+     * Sets main battle league config.
+     *
+     * @param league the league
+     */
     public void setMainBattleLeagueConfig(SpongeAPIConfigFactory<RachamonPixelmonShowdown, BattleLeagueConfig> league) {
         this.league = league;
     }
 
+    /**
+     * Sets main language.
+     *
+     * @param language the language
+     */
     public void setMainLanguage(SpongeAPIConfigFactory<RachamonPixelmonShowdown, LanguageConfig> language) {
         this.language = language;
     }
@@ -229,36 +237,91 @@ public class RachamonPixelmonShowdown extends RachamonSpongePluginProvider imple
         return this.language.getRoot();
     }
 
+    /**
+     * Gets league.
+     *
+     * @return the league
+     */
     public BattleLeagueConfig getLeague() {
         return this.league.getRoot();
     }
 
+    /**
+     * Gets database connector.
+     *
+     * @return the database connector
+     */
     public IDatabaseConnector getDatabaseConnector() {
         return databaseConnector;
     }
 
+    /**
+     * Sets database connector.
+     *
+     * @param databaseConnector the database connector
+     */
     public void setDatabaseConnector(IDatabaseConnector databaseConnector) {
         this.databaseConnector = databaseConnector;
     }
 
-    public RachamonPixelmonShowdownBattleManager getBattleManager() {
-        return this.getComponents().battleManager;
+    /**
+     * Gets components.
+     *
+     * @return the components
+     */
+    public Components getComponents() {
+        return this.components;
     }
 
+    /**
+     * Sets components.
+     *
+     * @param components the components
+     */
+    public void setComponents(Components components) {
+        this.components = components;
+    }
+
+    /**
+     * Gets queue manager.
+     *
+     * @return the queue manager
+     */
     public RachamonPixelmonShowdownQueueManager getQueueManager() {
         return this.getComponents().queueManager;
     }
 
+    /**
+     * Gets match making manager.
+     *
+     * @return the match making manager
+     */
     public RachamonPixelmonShowdownMatchMakingManager getMatchMakingManager() {
         return this.getComponents().matchMakingManager;
+    }
+
+    /**
+     * Gets injector.
+     *
+     * @return the injector
+     */
+    public Injector getInjector() {
+        return injector;
+    }
+
+    /**
+     * Sets injector.
+     *
+     * @param injector the injector
+     */
+    public void setInjector(Injector injector) {
+        this.injector = injector;
     }
 
     /**
      * The type Components.
      */
     public static class Components {
-        @Inject
-        private RachamonPixelmonShowdownBattleManager battleManager;
         @Inject
         private RachamonPixelmonShowdownQueueManager queueManager;
         @Inject

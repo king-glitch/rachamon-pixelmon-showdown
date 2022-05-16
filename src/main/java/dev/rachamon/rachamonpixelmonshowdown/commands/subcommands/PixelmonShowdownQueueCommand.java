@@ -15,6 +15,9 @@ import org.spongepowered.api.text.Text;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
+/**
+ * The type Pixelmon showdown queue command.
+ */
 @ICommandDescription("Queue Section")
 @ICommandAliases({"queue"})
 @ICommandPermission("rachamonpixelmonshowdown.command.user.queue")
@@ -38,7 +41,7 @@ public class PixelmonShowdownQueueCommand implements IPlayerCommand, IParameteri
             } else if (interaction.get().equalsIgnoreCase("leave")) {
                 RachamonPixelmonShowdown.getInstance().getMatchMakingManager().leaveQueue(league.get(), source);
             } else if (interaction.get().equalsIgnoreCase("stats")) {
-                RachamonPixelmonShowdown.getInstance().getMatchMakingManager().leagueStats(league.get());
+                RachamonPixelmonShowdown.getInstance().getMatchMakingManager().leagueStats(league.get(), source);
             } else if (interaction.get().equalsIgnoreCase("leaderboard")) {
                 RachamonPixelmonShowdown.getInstance().getMatchMakingManager().leagueLeaderboard(league.get(), source);
             } else if (interaction.get().equalsIgnoreCase("rules")) {

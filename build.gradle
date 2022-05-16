@@ -19,7 +19,7 @@ group = 'dev.rachamon'
 version = '0.0.1-SNAPSHOT'
 
 java {
-    archivesBaseName = 'rachamonpixelmonshowdown'
+    archivesBaseName = 'RachamonPixelmonShowdown'
     toolchain.languageVersion = JavaLanguageVersion.of(8)
 }
 
@@ -54,7 +54,7 @@ dependencies {
     minecraft 'net.minecraftforge:forge:' + forgeVersion
     compileOnly 'org.spongepowered:spongeapi:' + spongeVersion
     compileOnly 'pixelmon:Pixelmon-1.12.2-' + pixelmonVersion + '-server:' + pixelmonVersion
-    shadow 'com.github.king-glitch:sponge-plugin-api:fe6d36e8be'
+    shadow 'com.github.king-glitch:sponge-plugin-api:4e22a65759'
 }
 
 shadowJar {
@@ -62,21 +62,11 @@ shadowJar {
     classifier ''
 }
 
-jar {
-    manifest {
-        attributes([
-                "Specification-Title"     : "rachamonpixelmonshowdown",
-                "Specification-Vendor"    : "Rachamon",
-                "Specification-Version"   : "1",
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : project.jar.archiveVersion,
-                "Implementation-Vendor"   : "Rachamon",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
+reobf {
+    shadowJar {
+
     }
 }
-
-jar.finalizedBy('reobfJar')
 processResources {
     filesMatching("mcmod.info") {
         expand(

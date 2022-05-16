@@ -12,22 +12,23 @@ import dev.rachamon.rachamonpixelmonshowdown.configs.BattleLeagueConfig;
 import dev.rachamon.rachamonpixelmonshowdown.configs.LanguageConfig;
 import dev.rachamon.rachamonpixelmonshowdown.configs.MainConfig;
 import dev.rachamon.rachamonpixelmonshowdown.listeners.BattleListener;
+import dev.rachamon.rachamonpixelmonshowdown.services.BattleLogDataService;
 import dev.rachamon.rachamonpixelmonshowdown.services.PlayerDataService;
 import org.spongepowered.api.Sponge;
 
+/**
+ * The type Rachamon pixelmon showdown plugin manager.
+ */
 public class RachamonPixelmonShowdownPluginManager implements IRachamonPluginManager {
     private final RachamonPixelmonShowdown plugin = RachamonPixelmonShowdown.getInstance();
 
     @Override
     public void initialize() {
         this.plugin.setComponents(new RachamonPixelmonShowdown.Components());
-        this.plugin.setPluginInjector(this.plugin
-                .getSpongeInjector()
-                .createChildInjector(new RachamonPixelmonShowdownModule()));
-
-        this.plugin.getSpongeInjector().injectMembers(this.plugin.getComponents());
-
+        this.plugin.setInjector(this.plugin.getInjector().createChildInjector(new RachamonPixelmonShowdownModule()));
+        this.plugin.getInjector().injectMembers(this.plugin.getComponents());
         Sponge.getEventManager().registerListeners(this.plugin, new BattleListener());
+
 
         this.plugin.setInitialized(true);
     }
@@ -41,13 +42,11 @@ public class RachamonPixelmonShowdownPluginManager implements IRachamonPluginMan
     public void postInitialize() {
         this.reload();
         try {
-            if (this.plugin.getConfig().getRoot().getDatabaseCategorySetting().isEnableMySql()) {
+            if (this.plugin.getConfig().getDatabaseCategorySetting().isEnableMySql()) {
 
                 MainConfig.DatabaseCategorySetting databaseCategorySetting = this.plugin
                         .getConfig()
-                        .getRoot()
                         .getDatabaseCategorySetting();
-
                 this.plugin.setDatabaseConnector(new MySQLConnectorProvider(databaseCategorySetting.getHostName(), databaseCategorySetting.getPort(), databaseCategorySetting.getDatabaseName(), databaseCategorySetting.getUsername(), databaseCategorySetting.getPassword(), databaseCategorySetting.getEnableSSL()));
                 this.plugin.getLogger().info("Data handler connected using MySQL.");
             } else {
@@ -57,10 +56,18 @@ public class RachamonPixelmonShowdownPluginManager implements IRachamonPluginMan
                 this.plugin.getLogger().info("Data handler connected using SQLite.");
             }
 
-            PlayerDataService.initializeDatabase();
+            PlayerDataService.initialize();
+            BattleLogDataService.initialize();
         } catch (Exception e) {
-            e.printStackTrace();
             this.plugin.getLogger().error("error on connecting to database");
+        }
+
+        try {
+            this.plugin.getLogger().debug("initialize queue");
+            this.plugin.getQueueManager().initializeQueue();
+        } catch (Exception e) {
+            this.plugin.getLogger().debug("error on initialize queue");
+            e.printStackTrace();
         }
     }
 
@@ -73,6 +80,7 @@ public class RachamonPixelmonShowdownPluginManager implements IRachamonPluginMan
     public void reload() {
         this.registerConfigs();
         this.registerCommands();
+
 
     }
 
@@ -103,7 +111,11 @@ public class RachamonPixelmonShowdownPluginManager implements IRachamonPluginMan
                 .setClazzType(BattleLeagueConfig.class)
                 .build());
 
-        this.plugin.getLogger().setDebug(this.plugin.getConfig().getRoot().getMainCategorySetting().isDebug());
+        try {
+            this.plugin.getLogger().setDebug(this.plugin.getConfig().getMainCategorySetting().isDebug());
+        } catch (Exception ignore) {
+
+        }
 
     }
 

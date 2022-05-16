@@ -14,7 +14,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * The type League interaction command element.
+ */
 public class LeagueInteractionCommandElement extends CommandElement {
+    /**
+     * Instantiates a new League interaction command element.
+     *
+     * @param key the key
+     */
     public LeagueInteractionCommandElement(@Nullable Text key) {
         super(key);
     }
@@ -22,7 +30,7 @@ public class LeagueInteractionCommandElement extends CommandElement {
     @Nullable
     @Override
     protected Object parseValue(@Nonnull CommandSource source, @Nonnull CommandArgs args) throws ArgumentParseException {
-        return null;
+        return args.next();
     }
 
     @Nonnull

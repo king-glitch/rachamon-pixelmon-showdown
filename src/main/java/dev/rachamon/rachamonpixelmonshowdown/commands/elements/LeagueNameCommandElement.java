@@ -15,8 +15,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * The type League name command element.
+ */
 public class LeagueNameCommandElement extends CommandElement {
 
+    /**
+     * Instantiates a new League name command element.
+     *
+     * @param key the key
+     */
     public LeagueNameCommandElement(@Nullable Text key) {
         super(key);
     }
