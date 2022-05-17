@@ -19,7 +19,7 @@ import java.util.Optional;
  * The type Pixelmon showdown queue command.
  */
 @ICommandDescription("Queue Section")
-@ICommandAliases({"queue"})
+@ICommandAliases({"queue", "q"})
 @ICommandPermission("rachamonpixelmonshowdown.command.user.queue")
 public class PixelmonShowdownQueueCommand implements IPlayerCommand, IParameterizedCommand {
 

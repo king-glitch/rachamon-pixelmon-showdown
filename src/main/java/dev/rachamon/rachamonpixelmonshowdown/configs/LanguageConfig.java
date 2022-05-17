@@ -25,6 +25,72 @@ public class LanguageConfig {
         @Setting(value = "prefix", comment = "Prefix for chat message")
         protected String prefix = "&8[&c&lPixelmonShowdown&8]&7 ";
 
+        @Setting(value = "hover-text", comment = "hover text display")
+        protected String hoverText = "&8[&a&lHOVER&8]&r";
+
+        @Setting(value = "banned-header", comment = "banned title")
+        protected String bannedHeader = "&4&lBanned&7";
+
+        @Setting(value = "yes-text", comment = "yes text")
+        protected String yesText = "&a&lYes&7";
+
+        @Setting(value = "no-text", comment = "no text")
+        protected String noText = "&c&lNo&7";
+
+        @Setting(value = "team-double-text", comment = "team double text")
+        protected String teamDoubleText = "&5&lDouble&7";
+
+        @Setting(value = "team-single-text", comment = "team single text")
+        protected String teamSingle = "&6&lSingle&7";
+
+        @Setting(value = "team-double-error", comment = "error when player has only one pokemon when battle type is double.")
+        protected String teamDoubleError = "&cThis is double team, please put more than one pokemon in your party.";
+
+
+        @Setting(value = "not-in-battle", comment = "error when no in a battle")
+        protected String notInBattle = "&cYou or your opponent is not in a battle.";
+
+        @Setting(value = "successfully-draw", comment = "draw successfully message")
+        protected String successfullyDraw = "&aYou have successfully draw with your opponent. no point will be lose.";
+
+        @Setting(value = "player-ask-for-draw", comment = "message when player ask for a draw")
+        protected String playerAskForDraw = "&7You have request a draw to an opponent.";
+
+        @Setting(value = "opponent-ask-for-draw", comment = "message when player has ask an opponent for a draw")
+        protected String opponentAskForDraw = "&7Your opponent has asked you for a draw, would you like to accept?";
+
+        @Setting(comment = "when opponent decline draw", value = "opponent-decline")
+        protected String opponentDecline = "&cYour opponent has decline";
+
+        /**
+         * The Click to view.
+         */
+        @Setting(comment = "question click to view.", value = "click-to-view")
+        protected String clickToView = "&aClick to View";
+
+        /**
+         * The Click to answer.
+         */
+        @Setting(comment = "question click to answer.", value = "click-to-answer")
+        protected String clickToAnswer = "&aClick to Answer";
+
+        /**
+         * The Must be player.
+         */
+        @Setting(comment = "question click to view.", value = "must-be-player")
+        protected String mustBePlayer = "&cYou must be player to answer this question";
+
+        /**
+         * The Already responded.
+         */
+        @Setting(comment = "question click to view.", value = "already-responded")
+        protected String alreadyResponded = "&cYou have already responded to that question!";
+
+        @Setting(value = "accept-text", comment = "accept button")
+        protected String acceptText = "&8[&aAccept&8]";
+
+        @Setting(value = "decline-text", comment = "decline button")
+        protected String declineText = "&8[&aDecline&8]";
         /**
          * The Win message.
          */
@@ -147,10 +213,10 @@ public class LanguageConfig {
                 "&2&lRaise level to capacity&8: &a{raise-cap}",
                 "&2&lTeam Preview&8: &a{team-preview}",
                 "&2&lTurn Time&8: &a{turn-time}",
-                "&2&lPokemon banned&8: &8[&chover&8]",
-                "&2&lMove banned&8: &8[&chover&8]",
-                "&2&lAbility banned&8: &8[&chover&8]",
-                "&2&lItem banned&8: &8[&chover&8]",
+                "&2&lPokemon banned&8: {hover-pokemon-banned}",
+                "&2&lMove banned&8: {hover-move-banned}",
+                "&2&lAbility banned&8: {hover-ability-banned}",
+                "&2&lItem banned&8: {hover-item-banned}",
                 ""
 
         );
@@ -337,6 +403,78 @@ public class LanguageConfig {
 
         public List<String> getLeagueBattleRules() {
             return leagueBattleRules;
+        }
+
+        public String getHoverText() {
+            return hoverText;
+        }
+
+        public String getBannedHeader() {
+            return bannedHeader;
+        }
+
+        public String getYesText() {
+            return yesText;
+        }
+
+        public String getNoText() {
+            return noText;
+        }
+
+        public String getTeamDoubleText() {
+            return teamDoubleText;
+        }
+
+        public String getTeamSingle() {
+            return teamSingle;
+        }
+
+        public String getTeamDoubleError() {
+            return teamDoubleError;
+        }
+
+        public String getPlayerAskForDraw() {
+            return playerAskForDraw;
+        }
+
+        public String getOpponentAskForDraw() {
+            return opponentAskForDraw;
+        }
+
+        public String getAcceptText() {
+            return acceptText;
+        }
+
+        public String getDeclineText() {
+            return declineText;
+        }
+
+        public String getNotInBattle() {
+            return notInBattle;
+        }
+
+        public String getSuccessfullyDraw() {
+            return successfullyDraw;
+        }
+
+        public String getClickToView() {
+            return clickToView;
+        }
+
+        public String getClickToAnswer() {
+            return clickToAnswer;
+        }
+
+        public String getMustBePlayer() {
+            return mustBePlayer;
+        }
+
+        public String getAlreadyResponded() {
+            return alreadyResponded;
+        }
+
+        public String getOpponentDecline() {
+            return opponentDecline;
         }
     }
 

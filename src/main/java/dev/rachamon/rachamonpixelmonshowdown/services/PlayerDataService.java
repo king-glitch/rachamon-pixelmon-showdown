@@ -3,6 +3,8 @@ package dev.rachamon.rachamonpixelmonshowdown.services;
 import dev.rachamon.api.common.database.MySQLConnectorProvider;
 import dev.rachamon.rachamonpixelmonshowdown.RachamonPixelmonShowdown;
 import dev.rachamon.rachamonpixelmonshowdown.structures.PlayerEloProfile;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.living.player.Player;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -76,6 +78,7 @@ public class PlayerDataService {
                     statement.setInt(3, 1000);
                     statement.executeUpdate();
                     this.getPlayer(uuid, callback);
+                    this.plugin.getLogger().debug("adding player data to database;");
                 } catch (Exception e) {
                     this.getPlayer(uuid, callback);
                     this.plugin.getLogger().error("error on add player data;");
@@ -122,7 +125,9 @@ public class PlayerDataService {
                 statement.setString(1, uuid.toString());
                 statement.setString(2, this.leagueName);
                 ResultSet result = statement.executeQuery();
-                callback.accept(result.next());
+                if (result.next()) {
+                    callback.accept(result.getInt("amount") > 0);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 this.plugin.getLogger().error("error on has player data;");
@@ -159,13 +164,16 @@ public class PlayerDataService {
                 statement.setString(2, leagueName);
                 ResultSet result = statement.executeQuery();
                 if (!result.next()) {
+                    this.plugin.getLogger().debug("getting win lose data not found");
                     callback.accept(0);
                     return;
                 }
                 int amount = result.getInt("amount");
                 callback.accept(amount);
+                this.plugin.getLogger().debug("getting win lose:  " + amount);
             } catch (Exception e) {
-                this.plugin.getLogger().error("error on get player wins;");
+                this.plugin.getLogger().error("error on get player wins loses;");
+                callback.accept(0);
             }
         });
     }
@@ -191,13 +199,10 @@ public class PlayerDataService {
 
                 int elo = result.getInt("elo");
 
-                PlayerEloProfile profile = new PlayerEloProfile(uuid, this.leagueName, elo);
-                this.getPlayerWins(uuid, w -> {
-                    profile.setWin(w);
+                this.getPlayerWins(uuid, (w) -> {
                     this.getPlayerLoses(uuid, l -> {
-                        profile.setLose(l);
-                        callback.accept(profile);
-                        this.plugin.getLogger().debug("profile: " + profile.toString());
+                        this.plugin.getLogger().debug("profile: " + uuid);
+                        callback.accept(new PlayerEloProfile(uuid, this.leagueName, elo, w, l));
                     });
                 });
 
@@ -214,35 +219,44 @@ public class PlayerDataService {
      * @param callback the callback
      */
     public void getPlayers(Consumer<Map<UUID, PlayerEloProfile>> callback) {
-        String SQL = "SELECT * FROM showdown_playerdata WHERE league_type = ?";
+
         this.plugin.getDatabaseConnector().connect(connection -> {
+            String SQL = "SELECT * FROM showdown_playerdata WHERE league_type = ? AND uuid = ?";
             Map<UUID, PlayerEloProfile> players = new HashMap<>();
-            try (PreparedStatement statement = connection.prepareStatement(SQL)) {
-                statement.setString(1, leagueName);
-                ResultSet result = statement.executeQuery();
-                while (result.next()) {
-                    String _uuid = result.getString("uuid");
-                    int elo = result.getInt("elo");
 
-                    UUID uuid = UUID.fromString(_uuid);
+            for (Player player : Sponge.getServer().getOnlinePlayers()) {
+                try (PreparedStatement statement = connection.prepareStatement(SQL)) {
+                    statement.setString(1, leagueName);
+                    statement.setString(2, player.getUniqueId().toString());
 
-                    PlayerEloProfile profile = new PlayerEloProfile(uuid, leagueName, elo);
-                    this.getPlayerWins(uuid, w -> {
-                        profile.setWin(w);
-                        this.getPlayerLoses(uuid, l -> {
-                            profile.setLose(l);
-                            players.put(uuid, profile);
+                    ResultSet result = statement.executeQuery();
+                    if (result.next()) {
+                        String _uuid = result.getString("uuid");
+                        int elo = result.getInt("elo");
+
+                        UUID uuid = UUID.fromString(_uuid);
+
+                        PlayerEloProfile profile = new PlayerEloProfile(uuid, leagueName, elo);
+                        this.getPlayerWins(uuid, w -> {
+                            profile.setWin(w);
+                            this.getPlayerLoses(uuid, l -> {
+                                profile.setLose(l);
+                                players.put(uuid, profile);
+                            });
                         });
-                    });
+                    } else {
+                        this.addPlayer(player.getUniqueId(), (p) -> players.put(player.getUniqueId(), p));
+                    }
+
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    this.plugin.getLogger().error("error on add player data;");
                 }
-
-                callback.accept(players);
-
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                this.plugin.getLogger().error("error on add player data;");
             }
+            callback.accept(players);
+
+
         });
     }
 
@@ -256,12 +270,7 @@ public class PlayerDataService {
 
         RachamonPixelmonShowdown.getInstance().getDatabaseConnector().connect(connection -> {
             try (Statement statement = connection.createStatement()) {
-                statement.execute("CREATE TABLE showdown_playerdata (" +
-                        "id INTEGER PRIMARY KEY " + autoIncrement + ", " +
-                        "uuid VARCHAR(36) NOT NULL, " +
-                        "elo INTEGER NOT NULL," +
-                        "league_type VARCHAR NOT NULL, " +
-                        "UNIQUE (league_type, uuid) ON CONFLICT ABORT)");
+                statement.execute("CREATE TABLE showdown_playerdata (" + "id INTEGER PRIMARY KEY " + autoIncrement + ", " + "uuid VARCHAR(36) NOT NULL, " + "elo INTEGER NOT NULL," + "league_type VARCHAR NOT NULL, " + "UNIQUE (league_type, uuid) ON CONFLICT ABORT)");
             } catch (Exception e) {
                 RachamonPixelmonShowdown.getInstance().getLogger().error("error on initializing playerdata database.");
             }

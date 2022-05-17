@@ -58,11 +58,6 @@ public class RachamonPixelmonShowdownEloManager {
      * @param uuid the uuid
      */
     public void addPlayer(UUID uuid) {
-        if (this.hasPlayer(uuid)) {
-            this.plugin.getLogger().debug("already has this player " + uuid + " in database.");
-            return;
-        }
-
         this.playerDataService.addPlayer(uuid, profile -> {
             this.cache.put(uuid, profile);
         });
@@ -91,6 +86,7 @@ public class RachamonPixelmonShowdownEloManager {
 
         this.cache.put(uuid, profile);
         this.playerDataService.updatePlayerElo(uuid, profile.getElo());
+        this.sort();
     }
 
     /**

@@ -3,15 +3,21 @@ package dev.rachamon.rachamonpixelmonshowdown.managers.battle;
 import com.pixelmonmod.pixelmon.Pixelmon;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 import com.pixelmonmod.pixelmon.battles.BattleRegistry;
+import com.pixelmonmod.pixelmon.battles.controller.BattleControllerBase;
 import com.pixelmonmod.pixelmon.battles.controller.participants.PlayerParticipant;
 import com.pixelmonmod.pixelmon.battles.rules.BattleRules;
 import com.pixelmonmod.pixelmon.entities.pixelmon.EntityPixelmon;
+import com.pixelmonmod.pixelmon.enums.battle.EnumBattleType;
 import dev.rachamon.api.sponge.util.TextUtil;
+import dev.rachamon.api.sponge.util.chatquestion.ChatQuestion;
+import dev.rachamon.api.sponge.util.chatquestion.ChatQuestionAnswer;
 import dev.rachamon.rachamonpixelmonshowdown.RachamonPixelmonShowdown;
 import dev.rachamon.rachamonpixelmonshowdown.configs.BattleLeagueConfig;
+import dev.rachamon.rachamonpixelmonshowdown.configs.LanguageConfig;
 import dev.rachamon.rachamonpixelmonshowdown.services.QueueService;
 import dev.rachamon.rachamonpixelmonshowdown.structures.PlayerEloProfile;
 import dev.rachamon.rachamonpixelmonshowdown.utils.ChatUtil;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
@@ -19,6 +25,7 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.TextActions;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -108,11 +115,11 @@ public class RachamonPixelmonShowdownMatchMakingManager {
         EntityPlayerMP participant1 = (EntityPlayerMP) player1.get();
         EntityPlayerMP participant2 = (EntityPlayerMP) player2.get();
 
-        Pokemon[] playerParty1 = Pixelmon.storageManager.getParty(participant1).getAll();
-        Pokemon[] playerParty2 = Pixelmon.storageManager.getParty(participant2).getAll();
+        Pokemon[] playerOneParty = Pixelmon.storageManager.getParty(participant1).getAll();
+        Pokemon[] playerTwoParty = Pixelmon.storageManager.getParty(participant2).getAll();
 
-        ArrayList<Pokemon> playerPokemonList1 = RachamonPixelmonShowdownMatchMakingManager.filterNotNullPokemonParty(playerParty1);
-        ArrayList<Pokemon> playerPokemonList2 = RachamonPixelmonShowdownMatchMakingManager.filterNotNullPokemonParty(playerParty2);
+        ArrayList<Pokemon> playerPokemonList1 = new ArrayList<>(Arrays.asList(RachamonPixelmonShowdownMatchMakingManager.filterNotNullPokemonParty(playerOneParty)));
+        ArrayList<Pokemon> playerPokemonList2 = new ArrayList<>(Arrays.asList(RachamonPixelmonShowdownMatchMakingManager.filterNotNullPokemonParty(playerTwoParty)));
 
         if (ruleManager.getLeague().getBattleRule().isEnableTeamPreview()) {
             Task.builder().execute(() -> {
@@ -156,40 +163,28 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
         Task.builder().execute(() -> {
             try {
-                RachamonPixelmonShowdownMatchMakingManager.startBattle(playerUuid1, playerPokemonList1, null, playerUuid2, playerPokemonList2, null, ruleManager);
+                RachamonPixelmonShowdownMatchMakingManager.startBattle(playerUuid1, playerPokemonList1, playerUuid2, playerPokemonList2, ruleManager);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }).delay(prepareTime, TimeUnit.SECONDS).submit(RachamonPixelmonShowdown.getInstance());
     }
 
-    private static ArrayList<Pokemon> filterNotNullPokemonParty(Pokemon[] pokemons) {
-        ArrayList<Pokemon> playerPokemonList = new ArrayList<>();
-
-        for (Pokemon pokemon : pokemons) {
-            if (pokemon == null) {
-                continue;
-            }
-
-            playerPokemonList.add(pokemon);
-        }
-
-        return playerPokemonList;
+    private static Pokemon[] filterNotNullPokemonParty(Pokemon[] pokemons) {
+        return Arrays.stream(pokemons).filter(Objects::nonNull).toArray(Pokemon[]::new);
     }
 
     /**
      * Start battle.
      *
-     * @param uuid1                   the uuid 1
-     * @param playerOnePokemons       the player one pokemons
-     * @param playerOneStarterPokemon the player one starter pokemon
-     * @param uuid2                   the uuid 2
-     * @param playerTwoPokemons       the player two pokemons
-     * @param playerTwoStarterPokemon the player two starter pokemon
-     * @param ruleManager             the rule manager
+     * @param uuid1             the uuid 1
+     * @param playerOnePokemons the player one pokemons
+     * @param uuid2             the uuid 2
+     * @param playerTwoPokemons the player two pokemons
+     * @param ruleManager       the rule manager
      * @throws Exception the exception
      */
-    public static void startBattle(UUID uuid1, ArrayList<Pokemon> playerOnePokemons, Pokemon playerOneStarterPokemon, UUID uuid2, ArrayList<Pokemon> playerTwoPokemons, Pokemon playerTwoStarterPokemon, RachamonPixelmonShowdownRuleManager ruleManager) throws Exception {
+    public static void startBattle(UUID uuid1, ArrayList<Pokemon> playerOnePokemons, UUID uuid2, ArrayList<Pokemon> playerTwoPokemons, RachamonPixelmonShowdownRuleManager ruleManager) throws Exception {
 
         QueueService queueService = RachamonPixelmonShowdown
                 .getInstance()
@@ -242,8 +237,8 @@ public class RachamonPixelmonShowdownMatchMakingManager {
         Pokemon[] playerOnePokemonParty = Pixelmon.storageManager.getParty(participant1).getAll();
         Pokemon[] playerTwoPokemonParty = Pixelmon.storageManager.getParty(participant2).getAll();
 
-        ArrayList<Pokemon> playerOnePokemonsList = RachamonPixelmonShowdownMatchMakingManager.filterNotNullPokemonParty(playerOnePokemonParty);
-        ArrayList<Pokemon> playerTwoPokemonsList = RachamonPixelmonShowdownMatchMakingManager.filterNotNullPokemonParty(playerTwoPokemonParty);
+        ArrayList<Pokemon> playerOnePokemonsList = new ArrayList<>(Arrays.asList(RachamonPixelmonShowdownMatchMakingManager.filterNotNullPokemonParty(playerOnePokemonParty)));
+        ArrayList<Pokemon> playerTwoPokemonsList = new ArrayList<>(Arrays.asList(RachamonPixelmonShowdownMatchMakingManager.filterNotNullPokemonParty(playerTwoPokemonParty)));
 
         boolean playerOneSameParty = RachamonPixelmonShowdownMatchMakingManager.isPartySame(playerOnePokemons, playerOnePokemonsList);
         boolean playerTwoSameParty = RachamonPixelmonShowdownMatchMakingManager.isPartySame(playerTwoPokemons, playerTwoPokemonsList);
@@ -271,6 +266,7 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                         .getLanguage()
                         .getGeneralLanguageBattle()
                         .getYourTeamNotSame());
+
                 ChatUtil.sendMessage(playerOne.get(), RachamonPixelmonShowdown
                         .getInstance()
                         .getLanguage()
@@ -295,6 +291,7 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                         .getLanguage()
                         .getGeneralLanguageBattle()
                         .getYourTeamHasFainted());
+
                 ChatUtil.sendMessage(playerTwo.get(), RachamonPixelmonShowdown
                         .getInstance()
                         .getLanguage()
@@ -308,6 +305,7 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                         .getLanguage()
                         .getGeneralLanguageBattle()
                         .getYourTeamHasFainted());
+
                 ChatUtil.sendMessage(playerOne.get(), RachamonPixelmonShowdown
                         .getInstance()
                         .getLanguage()
@@ -331,6 +329,7 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                         .getLanguage()
                         .getGeneralLanguageBattle()
                         .getYourTeamNotValidated());
+
                 ChatUtil.sendMessage(playerTwo.get(), RachamonPixelmonShowdown
                         .getInstance()
                         .getLanguage()
@@ -344,6 +343,7 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                         .getLanguage()
                         .getGeneralLanguageBattle()
                         .getYourTeamNotValidated());
+
                 ChatUtil.sendMessage(playerOne.get(), RachamonPixelmonShowdown
                         .getInstance()
                         .getLanguage()
@@ -367,6 +367,7 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                         .getLanguage()
                         .getGeneralLanguageBattle()
                         .getYouAlreadyInBattle());
+
                 ChatUtil.sendMessage(playerTwo.get(), RachamonPixelmonShowdown
                         .getInstance()
                         .getLanguage()
@@ -380,6 +381,7 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                         .getLanguage()
                         .getGeneralLanguageBattle()
                         .getYouAlreadyInBattle());
+
                 ChatUtil.sendMessage(playerOne.get(), RachamonPixelmonShowdown
                         .getInstance()
                         .getLanguage()
@@ -392,26 +394,38 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
             return;
         }
+
         EntityPixelmon participantOneStarter;
         EntityPixelmon participantTwoStarter;
-        if (playerOneStarterPokemon == null) {
-            participantOneStarter = Pixelmon.storageManager
-                    .getParty(participant1)
-                    .getAndSendOutFirstAblePokemon(participant1);
-        } else {
-            participantOneStarter = playerOneStarterPokemon.getOrSpawnPixelmon(participant1);
-        }
 
-        if (playerTwoStarterPokemon == null) {
-            participantTwoStarter = Pixelmon.storageManager
-                    .getParty(participant2)
-                    .getAndSendOutFirstAblePokemon(participant2);
-        } else {
-            participantTwoStarter = playerTwoStarterPokemon.getOrSpawnPixelmon(participant2);
-        }
+        EntityPixelmon participantOneSecondStarter = null;
+        EntityPixelmon participantTwoSecondStarter = null;
+
+        participantOneStarter = Pixelmon.storageManager
+                .getParty(participant1)
+                .getAndSendOutFirstAblePokemon(participant1);
+
+        participantTwoStarter = Pixelmon.storageManager
+                .getParty(participant2)
+                .getAndSendOutFirstAblePokemon(participant2);
 
         PlayerParticipant[] playerOneParticipant = {new PlayerParticipant(participant1, participantOneStarter)};
         PlayerParticipant[] playerTwoParticipant = {new PlayerParticipant(participant2, participantTwoStarter)};
+
+        if (ruleManager.getBattleRules().battleType == EnumBattleType.Double) {
+
+            participantOneSecondStarter = Objects
+                    .requireNonNull(Pixelmon.storageManager.getParty(participant1).get(1))
+                    .getOrSpawnPixelmon(participant1);
+
+            participantTwoSecondStarter = Objects
+                    .requireNonNull(Pixelmon.storageManager.getParty(participant2).get(1))
+                    .getOrSpawnPixelmon(participant2);
+
+            playerOneParticipant = new PlayerParticipant[]{new PlayerParticipant(participant1, participantOneStarter, participantOneSecondStarter)};
+            playerTwoParticipant = new PlayerParticipant[]{new PlayerParticipant(participant2, participantTwoStarter, participantTwoSecondStarter)};
+        }
+
 
         BattleRegistry.startBattle(playerOneParticipant, playerTwoParticipant, ruleManager.getBattleRules());
 
@@ -439,22 +453,28 @@ public class RachamonPixelmonShowdownMatchMakingManager {
      * @param queue the queue
      */
     public static void findMatch(QueueService queue) {
-        ArrayList<UUID> toRemove = new ArrayList<>();
+        ArrayList<UUID> nextPhase = new ArrayList<>();
         ArrayList<UUID> inQueue = queue.getInQueue();
         RachamonPixelmonShowdownEloManager eloManager = queue.getEloManager();
 
         for (UUID uuid : inQueue) {
 
-            if (toRemove.contains(uuid)) {
+            if (nextPhase.contains(uuid)) {
                 continue;
             }
 
             int lowestMatchValue = -1;
             PlayerEloProfile playerProfile = eloManager.getProfileData(uuid);
+
+            if (playerProfile == null) {
+                eloManager.addPlayer(uuid);
+                continue;
+            }
+
             UUID opponent = null;
 
             for (UUID uuid2 : inQueue) {
-                if (toRemove.contains(uuid2)) {
+                if (nextPhase.contains(uuid2)) {
                     continue;
                 }
 
@@ -463,6 +483,12 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                 }
 
                 PlayerEloProfile opponentProfile = eloManager.getProfileData(uuid2);
+
+                if (opponentProfile == null) {
+                    eloManager.addPlayer(uuid2);
+                    continue;
+                }
+
                 int matchValue = Math.abs(playerProfile.getElo() - opponentProfile.getElo());
 
                 if (matchValue <= RachamonPixelmonShowdown
@@ -478,16 +504,15 @@ public class RachamonPixelmonShowdownMatchMakingManager {
             }
 
             if (opponent != null) {
-                toRemove.add(opponent);
-                toRemove.add(uuid);
+                nextPhase.add(opponent);
+                nextPhase.add(uuid);
                 RachamonPixelmonShowdownMatchMakingManager.startPreBattle(uuid, opponent, queue.getRuleManager());
             }
         }
 
-        for (UUID uuid : toRemove) {
+        for (UUID uuid : nextPhase) {
             queue.addPlayerInPreMatch(uuid);
         }
-
     }
 
     /**
@@ -550,6 +575,12 @@ public class RachamonPixelmonShowdownMatchMakingManager {
         QueueService queueService = RachamonPixelmonShowdown.getInstance().getQueueManager().findQueue(leagueName);
         RachamonPixelmonShowdownEloManager eloManager = queueService.getEloManager();
         PlayerEloProfile profile = eloManager.getProfileData(player.getUniqueId());
+
+        if (profile == null) {
+            eloManager.addPlayer(player.getUniqueId());
+            throw new Exception("Adding your data to database please try again later.");
+        }
+
         int wins = profile.getWin();
         int loses = profile.getLose();
         int elo = profile.getElo();
@@ -643,17 +674,78 @@ public class RachamonPixelmonShowdownMatchMakingManager {
         List<Text> contents = new ArrayList<>();
         for (String text : this.plugin.getLanguage().getGeneralLanguageBattle().getLeagueBattleRules()) {
             text = text
-                    .replaceAll("\\{type}", rules.isDoubleBattle() ? "Double" : "Single" + "")
+                    .replaceAll("\\{type}", rules.isDoubleBattle() ? this.plugin
+                            .getLanguage()
+                            .getGeneralLanguageBattle()
+                            .getTeamDoubleText() : this.plugin.getLanguage().getGeneralLanguageBattle().getTeamSingle())
                     .replaceAll("\\{level-capacity}", rules.getLevelCapacity() + "")
-                    .replaceAll("\\{raise-cap}", rules.isRaiseMaxLevel() ? "Yes" : "No" + "")
-                    .replaceAll("\\{team-preview}", rules.isEnableTeamPreview() ? "Yes" : "No" + "")
+                    .replaceAll("\\{raise-cap}", rules.isRaiseMaxLevel() ? this.plugin
+                            .getLanguage()
+                            .getGeneralLanguageBattle()
+                            .getYesText() : this.plugin.getLanguage().getGeneralLanguageBattle().getNoText())
+                    .replaceAll("\\{team-preview}", rules.isEnableTeamPreview() ? this.plugin
+                            .getLanguage()
+                            .getGeneralLanguageBattle()
+                            .getYesText() : this.plugin.getLanguage().getGeneralLanguageBattle().getNoText())
                     .replaceAll("\\{turn-time}", rules.getTurnTime() + " seconds.");
+
+
+            Text.Builder display = Text.builder();
+
+            if (text.contains("{hover-item-banned}")) {
+                this.addHoverText(text, "\\{hover-item-banned}", display, queueService
+                        .getRuleManager()
+                        .getLeague()
+                        .getHeldItemClause());
+            }
+
+            if (text.contains("{hover-ability-banned}")) {
+                this.addHoverText(text, "\\{hover-ability-banned}", display, queueService
+                        .getRuleManager()
+                        .getLeague()
+                        .getAbilities());
+            }
+
+            if (text.contains("{hover-move-banned}")) {
+                this.addHoverText(text, "\\{hover-move-banned}", display, queueService
+                        .getRuleManager()
+                        .getLeague()
+                        .getMoveClaus());
+            }
+
+            if (text.contains("{hover-pokemon-banned}")) {
+                this.addHoverText(text, "\\{hover-pokemon-banned}", display, queueService
+                        .getRuleManager()
+                        .getLeague()
+                        .getHeldItemClause());
+            }
+
+            if (text.contains("{hover-item-banned}") || text.contains("{hover-ability-banned}") || text.contains("{hover-move-banned}") || text.contains("{hover-pokemon-banned}")) {
+                contents.add(display.build());
+                continue;
+            }
 
             contents.add(TextUtil.toText(text));
         }
 
         builder.contents(contents).sendTo(player);
 
+    }
+
+    private void addHoverText(String text, String containText, Text.Builder display, List<String> banned) {
+
+        String[] splitText = text.split(containText);
+
+        for (int i = 0; i < splitText.length; i++) {
+            Text hover = TextUtil.toText(splitText[i]);
+            display = display.append(hover);
+
+            if (i != splitText.length - 1) {
+                display = display
+                        .append(TextUtil.toText(this.plugin.getLanguage().getGeneralLanguageBattle().getHoverText()))
+                        .onHover(TextActions.showText(TextUtil.toText(String.join("\n", banned))));
+            }
+        }
     }
 
     /**
@@ -683,7 +775,9 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
         ArrayList<Pokemon> pokemonArrayList = new ArrayList<>(Arrays.asList(party));
 
+
         QueueService queueService = this.plugin.getQueueManager().findQueue(leagueName);
+
 
         if (queueService == null) {
             throw new Exception(RachamonPixelmonShowdown
@@ -691,6 +785,14 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                     .getLanguage()
                     .getGeneralLanguageBattle()
                     .getLeagueNotFound());
+        }
+
+        if (queueService.getRuleManager().getLeague().getBattleRule().isDoubleBattle() && pokemonArrayList.size() < 2) {
+            throw new Exception(RachamonPixelmonShowdown
+                    .getInstance()
+                    .getLanguage()
+                    .getGeneralLanguageBattle()
+                    .getTeamDoubleError());
         }
 
         BattleRules rules = queueService.getRuleManager().getBattleRules();
@@ -703,10 +805,6 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
         queueService.addPlayerInQueue(player.getUniqueId());
 
-        for (UUID uuid : queueService.getInQueue()) {
-            this.plugin.getLogger().debug("enter in queue: " + uuid);
-        }
-
         RachamonPixelmonShowdownMatchMakingManager.runTask();
 
         ChatUtil.sendMessage(player, RachamonPixelmonShowdown
@@ -715,6 +813,71 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                 .getGeneralLanguageBattle()
                 .getPlayerEnterQueue()
                 .replaceAll("\\{league}", leagueName));
+    }
+
+    public void askForDraw(Player player) throws Exception {
+
+        EntityPlayer ePlayer = (EntityPlayer) player;
+        RachamonPixelmonShowdownQueueManager queueManager = RachamonPixelmonShowdown.getInstance().getQueueManager();
+
+        BattleControllerBase battleControllerBase = BattleRegistry.getBattle(ePlayer);
+        List<PlayerParticipant> playerParticipants = battleControllerBase.getPlayers();
+
+        UUID participant1 = playerParticipants.get(0).getEntity().getUniqueID();
+        UUID participant2 = playerParticipants.get(1).getEntity().getUniqueID();
+
+        QueueService queueService = queueManager.getPlayerInMatch(player.getUniqueId());
+
+        if (queueService == null) {
+            return;
+        }
+
+        LanguageConfig.GeneralLanguageBattle language = RachamonPixelmonShowdown
+                .getInstance()
+                .getLanguage()
+                .getGeneralLanguageBattle();
+
+        if (!queueService.isPlayerInMatch(participant1) || !queueService.isPlayerInMatch(participant2)) {
+            throw new Exception(language.getNotInBattle());
+        }
+
+        Optional<Player> opponent = Sponge.getServer().getPlayer(participant2);
+
+        if (!opponent.isPresent()) {
+            return;
+        }
+
+        ChatUtil.sendMessage(player, language.getPlayerAskForDraw());
+
+        ChatQuestion question = ChatQuestion
+                .of(TextUtil.toText(language.getOpponentAskForDraw()))
+                .addAnswer(ChatQuestionAnswer.of(TextUtil.toText(language.getAcceptText()), target -> {
+                    queueService.resetPlayer(participant1);
+                    queueService.resetPlayer(participant2);
+
+                    if (BattleRegistry.getBattle(ePlayer) != null) {
+                        BattleRegistry.getBattle(ePlayer).endBattle();
+                    }
+
+                    if (BattleRegistry.getBattle((EntityPlayerMP) opponent.get()) != null) {
+                        BattleRegistry.getBattle((EntityPlayerMP) opponent.get()).endBattle();
+                    }
+
+                    ChatUtil.sendMessage(player, language.getSuccessfullyDraw());
+                    ChatUtil.sendMessage(opponent.get(), language.getSuccessfullyDraw());
+                }))
+                .addAnswer(ChatQuestionAnswer.of(TextUtil.toText(language.getDeclineText()), target -> {
+                    ChatUtil.sendMessage(player, language.getOpponentDecline());
+                }))
+                .build();
+
+        question.setAlreadyResponse(TextUtil.toText(language.getAlreadyResponded()));
+        question.setClickToAnswer(TextUtil.toText(language.getClickToAnswer()));
+        question.setClickToView(TextUtil.toText(language.getClickToView()));
+        question.setMustBePlayer(TextUtil.toText(language.getMustBePlayer()));
+
+        question.pollChat(opponent.get());
+
     }
 
 }

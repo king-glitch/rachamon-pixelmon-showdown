@@ -240,11 +240,6 @@ public class BattleListener {
     }
 
     private void runPostBattle(boolean force, BattleEndEvent event, PlayerParticipant participant1, UUID playerUuid1, UUID playerUuid2, Player player1, Player player2, QueueService queue, RachamonPixelmonShowdownEloManager eloManager) {
-
-        if (event.results.get(participant1) == BattleResults.DRAW) {
-            return;
-        }
-
         boolean isPlayerOneWin = event.results.get(participant1) == BattleResults.VICTORY;
 
         if (force) {

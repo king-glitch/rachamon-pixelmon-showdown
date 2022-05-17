@@ -325,8 +325,6 @@ public class RachamonPixelmonShowdownRuleManager {
      * @return the rachamon pixelmon showdown rule manager
      */
     public RachamonPixelmonShowdownRuleManager build() {
-        BattleRules battleRules = new BattleRules();
-
         battleRules.fullHeal = this.league.getBattleRule().isFullHeal();
         battleRules.battleType = league
                 .getBattleRule()
