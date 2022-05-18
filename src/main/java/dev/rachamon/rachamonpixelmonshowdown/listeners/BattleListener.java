@@ -75,40 +75,38 @@ public class BattleListener {
             return;
         }
 
-        QueueService queue = queueManager.getPlayerInMatch(playerOneUuid);
+        try {
+            QueueService queue = queueManager.getPlayerInMatch(playerOneUuid);
 
-        if (queue == null) {
-            this.plugin.getLogger().debug("queue is null");
-            return;
+            RachamonPixelmonShowdownEloManager eloManager = queue.getEloManager();
+
+            if (!queue.isPlayerInMatch(playerTwoUuid)) {
+                this.plugin.getLogger().debug("player 2 not in match");
+                return;
+            }
+
+            if (event.abnormal || event.cause == EnumBattleEndCause.FORCE) {
+
+                Task.builder().execute(() -> {
+                    this.runPostBattle(true, event, participant1, playerOneUuid, playerTwoUuid, _entityPlayerOne, _entityPlayerTwo, queue, eloManager);
+
+                    if (BattleRegistry.getBattle(entityPlayerOne) != null) {
+                        BattleRegistry.getBattle(entityPlayerOne).endBattle();
+                    }
+
+                    if (BattleRegistry.getBattle(entityPlayerTwo) != null) {
+                        BattleRegistry.getBattle(entityPlayerTwo).endBattle();
+                    }
+
+                }).delay(500, TimeUnit.MICROSECONDS).submit(RachamonPixelmonShowdown.getInstance());
+
+                return;
+            }
+
+            this.runPostBattle(false, event, participant1, playerOneUuid, playerTwoUuid, _entityPlayerOne, _entityPlayerTwo, queue, eloManager);
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
-
-
-        RachamonPixelmonShowdownEloManager eloManager = queue.getEloManager();
-
-        if (!queue.isPlayerInMatch(playerTwoUuid)) {
-            this.plugin.getLogger().debug("player 2 not in match");
-            return;
-        }
-
-        if (event.abnormal || event.cause == EnumBattleEndCause.FORCE) {
-
-            Task.builder().execute(() -> {
-                this.runPostBattle(true, event, participant1, playerOneUuid, playerTwoUuid, _entityPlayerOne, _entityPlayerTwo, queue, eloManager);
-
-                if (BattleRegistry.getBattle(entityPlayerOne) != null) {
-                    BattleRegistry.getBattle(entityPlayerOne).endBattle();
-                }
-
-                if (BattleRegistry.getBattle(entityPlayerTwo) != null) {
-                    BattleRegistry.getBattle(entityPlayerTwo).endBattle();
-                }
-
-            }).delay(500, TimeUnit.MICROSECONDS).submit(RachamonPixelmonShowdown.getInstance());
-
-            return;
-        }
-
-        this.runPostBattle(false, event, participant1, playerOneUuid, playerTwoUuid, _entityPlayerOne, _entityPlayerTwo, queue, eloManager);
     }
 
     /**
@@ -118,7 +116,9 @@ public class BattleListener {
      */
     @Listener
     public void onPlayerQuit(ClientConnectionEvent.Disconnect event) {
-        RachamonPixelmonShowdownQueueManager queueManager = RachamonPixelmonShowdown.getInstance().getQueueManager();
+        RachamonPixelmonShowdownQueueManager queueManager = RachamonPixelmonShowdown
+                .getInstance()
+                .getQueueManager();
         UUID uuid = event.getTargetEntity().getUniqueId();
 
         if (!queueManager.isPlayerInAction(uuid)) {
@@ -148,7 +148,9 @@ public class BattleListener {
             return;
         }
 
-        RachamonPixelmonShowdownQueueManager queueManager = RachamonPixelmonShowdown.getInstance().getQueueManager();
+        RachamonPixelmonShowdownQueueManager queueManager = RachamonPixelmonShowdown
+                .getInstance()
+                .getQueueManager();
 
         Player winner = (Player) event.getSource();
         UUID winnerUuid = winner.getUniqueId();
@@ -160,41 +162,42 @@ public class BattleListener {
             return;
         }
 
-        QueueService queueService = queueManager.getPlayerInMatch(winnerUuid);
+        try {
+            QueueService queueService = queueManager.getPlayerInMatch(winnerUuid);
 
-        if (queueService == null) {
-            return;
+            EntityPlayer ePlayer = (EntityPlayer) winner;
+            BattleControllerBase battleControllerBase = BattleRegistry.getBattle(ePlayer);
+            List<PlayerParticipant> playerParticipants = battleControllerBase.getPlayers();
+
+            UUID participant1 = playerParticipants.get(0).getEntity().getUniqueID();
+            UUID participant2 = playerParticipants.get(1).getEntity().getUniqueID();
+
+            if (winner.getUniqueId().equals(participant1)) {
+                loser = Sponge.getServer().getPlayer(participant2).orElse(null);
+            } else {
+                loser = Sponge.getServer().getPlayer(participant1).orElse(null);
+            }
+
+            if (loser == null) {
+                return;
+            }
+
+            loserUuid = loser.getUniqueId();
+
+            RachamonPixelmonShowdownEloManager eloManager = queueService.getEloManager();
+
+            PlayerEloProfile eloWinnerProfile = eloManager.getProfileData(winnerUuid);
+            PlayerEloProfile eloLoserProfile = eloManager.getProfileData(loserUuid);
+
+            this.processElo(winner, winnerUuid, loser, loserUuid, queueService, eloManager, eloWinnerProfile, eloLoserProfile);
+        } catch (Exception ignored) {
+
         }
-
-
-        EntityPlayer ePlayer = (EntityPlayer) winner;
-        BattleControllerBase battleControllerBase = BattleRegistry.getBattle(ePlayer);
-        List<PlayerParticipant> playerParticipants = battleControllerBase.getPlayers();
-
-        UUID participant1 = playerParticipants.get(0).getEntity().getUniqueID();
-        UUID participant2 = playerParticipants.get(1).getEntity().getUniqueID();
-
-        if (winner.getUniqueId().equals(participant1)) {
-            loser = Sponge.getServer().getPlayer(participant2).orElse(null);
-        } else {
-            loser = Sponge.getServer().getPlayer(participant1).orElse(null);
-        }
-
-        if (loser == null) {
-            return;
-        }
-
-        loserUuid = loser.getUniqueId();
-
-        RachamonPixelmonShowdownEloManager eloManager = queueService.getEloManager();
-
-        PlayerEloProfile eloWinnerProfile = eloManager.getProfileData(winnerUuid);
-        PlayerEloProfile eloLoserProfile = eloManager.getProfileData(loserUuid);
-
-        this.processElo(winner, winnerUuid, loser, loserUuid, queueService, eloManager, eloWinnerProfile, eloLoserProfile);
     }
 
-    private void processElo(Player winner, UUID winnerUuid, Player loser, UUID loserUuid, QueueService queueService, RachamonPixelmonShowdownEloManager eloManager, PlayerEloProfile eloWinnerProfile, PlayerEloProfile eloLoserProfile) {
+    private void processElo(Player winner, UUID winnerUuid, Player loser, UUID loserUuid, QueueService
+            queueService, RachamonPixelmonShowdownEloManager eloManager, PlayerEloProfile eloWinnerProfile, PlayerEloProfile
+                                    eloLoserProfile) {
         int winnerElo = eloWinnerProfile.getElo();
         int loserElo = eloLoserProfile.getElo();
 
@@ -239,7 +242,9 @@ public class BattleListener {
         eloManager.sort();
     }
 
-    private void runPostBattle(boolean force, BattleEndEvent event, PlayerParticipant participant1, UUID playerUuid1, UUID playerUuid2, Player player1, Player player2, QueueService queue, RachamonPixelmonShowdownEloManager eloManager) {
+    private void runPostBattle(boolean force, BattleEndEvent event, PlayerParticipant participant1, UUID
+            playerUuid1, UUID playerUuid2, Player player1, Player player2, QueueService
+                                       queue, RachamonPixelmonShowdownEloManager eloManager) {
         boolean isPlayerOneWin = event.results.get(participant1) == BattleResults.VICTORY;
 
         if (force) {

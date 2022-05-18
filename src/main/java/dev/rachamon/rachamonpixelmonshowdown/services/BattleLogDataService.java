@@ -27,14 +27,13 @@ public class BattleLogDataService {
     }
 
     public static void initialize() {
-        String autoIncrement = RachamonPixelmonShowdown
-                .getInstance()
-                .getDatabaseConnector() instanceof MySQLConnectorProvider ? "AUTO_INCREMENT" : "";
+        String autoIncrement = "";
 
         RachamonPixelmonShowdown.getInstance().getDatabaseConnector().connect(connection -> {
             try (Statement statement = connection.createStatement()) {
                 statement.execute("CREATE TABLE showdown_log (" + "id INTEGER PRIMARY KEY " + autoIncrement + ", " + "winner_uuid VARCHAR(36) NOT NULL, " + "loser_uuid VARCHAR(36) NOT NULL, " + "winner_point INTEGER NOT NULL," + "loser_point INTEGER NOT NULL," + "league_type VARCHAR NOT NULL, " + "created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
             } catch (Exception e) {
+                e.printStackTrace();
                 RachamonPixelmonShowdown.getInstance().getLogger().error("error on initializing log database.");
             }
         });

@@ -62,35 +62,9 @@ public class LanguageConfig {
         @Setting(comment = "when opponent decline draw", value = "opponent-decline")
         protected String opponentDecline = "&cYour opponent has decline";
 
-        /**
-         * The Click to view.
-         */
-        @Setting(comment = "question click to view.", value = "click-to-view")
-        protected String clickToView = "&aClick to View";
+        @Setting(comment = "when you decline draw", value = "opponent-decline")
+        protected String youDecline = "&7You have declined your opponent proposal";
 
-        /**
-         * The Click to answer.
-         */
-        @Setting(comment = "question click to answer.", value = "click-to-answer")
-        protected String clickToAnswer = "&aClick to Answer";
-
-        /**
-         * The Must be player.
-         */
-        @Setting(comment = "question click to view.", value = "must-be-player")
-        protected String mustBePlayer = "&cYou must be player to answer this question";
-
-        /**
-         * The Already responded.
-         */
-        @Setting(comment = "question click to view.", value = "already-responded")
-        protected String alreadyResponded = "&cYou have already responded to that question!";
-
-        @Setting(value = "accept-text", comment = "accept button")
-        protected String acceptText = "&8[&aAccept&8]";
-
-        @Setting(value = "decline-text", comment = "decline button")
-        protected String declineText = "&8[&aDecline&8]";
         /**
          * The Win message.
          */
@@ -433,21 +407,6 @@ public class LanguageConfig {
             return teamDoubleError;
         }
 
-        public String getPlayerAskForDraw() {
-            return playerAskForDraw;
-        }
-
-        public String getOpponentAskForDraw() {
-            return opponentAskForDraw;
-        }
-
-        public String getAcceptText() {
-            return acceptText;
-        }
-
-        public String getDeclineText() {
-            return declineText;
-        }
 
         public String getNotInBattle() {
             return notInBattle;
@@ -457,24 +416,20 @@ public class LanguageConfig {
             return successfullyDraw;
         }
 
-        public String getClickToView() {
-            return clickToView;
-        }
-
-        public String getClickToAnswer() {
-            return clickToAnswer;
-        }
-
-        public String getMustBePlayer() {
-            return mustBePlayer;
-        }
-
-        public String getAlreadyResponded() {
-            return alreadyResponded;
-        }
-
         public String getOpponentDecline() {
             return opponentDecline;
+        }
+
+        public String getYouDecline() {
+            return youDecline;
+        }
+
+        public String getPlayerAskForDraw() {
+            return playerAskForDraw;
+        }
+
+        public String getOpponentAskForDraw() {
+            return opponentAskForDraw;
         }
     }
 

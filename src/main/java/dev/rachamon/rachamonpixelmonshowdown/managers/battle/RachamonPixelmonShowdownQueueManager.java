@@ -123,9 +123,21 @@ public class RachamonPixelmonShowdownQueueManager {
      * @param uuid the uuid
      * @return the player in match
      */
-    @Nullable
-    public QueueService getPlayerInMatch(UUID uuid) {
-        return this.queue.values().stream().filter(v -> v.isPlayerInMatch(uuid)).findFirst().orElse(null);
+    public QueueService getPlayerInMatch(UUID uuid) throws Exception {
+        QueueService queueService = this.queue
+                .values()
+                .stream()
+                .filter(v -> v.isPlayerInMatch(uuid))
+                .findFirst()
+                .orElse(null);
+        if (queueService == null) {
+            throw new Exception(RachamonPixelmonShowdown
+                    .getInstance()
+                    .getLanguage()
+                    .getGeneralLanguageBattle()
+                    .getNotInBattle());
+        }
+        return queueService;
     }
 
     /**

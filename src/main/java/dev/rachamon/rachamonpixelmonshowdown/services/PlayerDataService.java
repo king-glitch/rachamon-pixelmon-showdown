@@ -221,42 +221,29 @@ public class PlayerDataService {
     public void getPlayers(Consumer<Map<UUID, PlayerEloProfile>> callback) {
 
         this.plugin.getDatabaseConnector().connect(connection -> {
-            String SQL = "SELECT * FROM showdown_playerdata WHERE league_type = ? AND uuid = ?";
+            String SQL = "SELECT * FROM showdown_playerdata WHERE league_type = ?";
             Map<UUID, PlayerEloProfile> players = new HashMap<>();
-
-            for (Player player : Sponge.getServer().getOnlinePlayers()) {
-                try (PreparedStatement statement = connection.prepareStatement(SQL)) {
-                    statement.setString(1, leagueName);
-                    statement.setString(2, player.getUniqueId().toString());
-
-                    ResultSet result = statement.executeQuery();
-                    if (result.next()) {
-                        String _uuid = result.getString("uuid");
-                        int elo = result.getInt("elo");
-
-                        UUID uuid = UUID.fromString(_uuid);
-
-                        PlayerEloProfile profile = new PlayerEloProfile(uuid, leagueName, elo);
-                        this.getPlayerWins(uuid, w -> {
-                            profile.setWin(w);
-                            this.getPlayerLoses(uuid, l -> {
-                                profile.setLose(l);
-                                players.put(uuid, profile);
-                            });
+            try (PreparedStatement statement = connection.prepareStatement(SQL)) {
+                statement.setString(1, leagueName);
+                ResultSet result = statement.executeQuery();
+                while (result.next()) {
+                    String _uuid = result.getString("uuid");
+                    int elo = result.getInt("elo");
+                    UUID uuid = UUID.fromString(_uuid);
+                    PlayerEloProfile profile = new PlayerEloProfile(uuid, leagueName, elo);
+                    this.getPlayerWins(uuid, w -> {
+                        profile.setWin(w);
+                        this.getPlayerLoses(uuid, l -> {
+                            profile.setLose(l);
+                            players.put(uuid, profile);
                         });
-                    } else {
-                        this.addPlayer(player.getUniqueId(), (p) -> players.put(player.getUniqueId(), p));
-                    }
-
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    this.plugin.getLogger().error("error on add player data;");
+                    });
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+                this.plugin.getLogger().error("error on add player data;");
             }
             callback.accept(players);
-
-
         });
     }
 
@@ -264,14 +251,13 @@ public class PlayerDataService {
      * Initialize database.
      */
     public static void initialize() {
-        String autoIncrement = RachamonPixelmonShowdown
-                .getInstance()
-                .getDatabaseConnector() instanceof MySQLConnectorProvider ? "AUTO_INCREMENT" : "";
+        String autoIncrement = "";
 
         RachamonPixelmonShowdown.getInstance().getDatabaseConnector().connect(connection -> {
             try (Statement statement = connection.createStatement()) {
                 statement.execute("CREATE TABLE showdown_playerdata (" + "id INTEGER PRIMARY KEY " + autoIncrement + ", " + "uuid VARCHAR(36) NOT NULL, " + "elo INTEGER NOT NULL," + "league_type VARCHAR NOT NULL, " + "UNIQUE (league_type, uuid) ON CONFLICT ABORT)");
             } catch (Exception e) {
+                e.printStackTrace();
                 RachamonPixelmonShowdown.getInstance().getLogger().error("error on initializing playerdata database.");
             }
         });

@@ -9,8 +9,6 @@ import com.pixelmonmod.pixelmon.battles.rules.BattleRules;
 import com.pixelmonmod.pixelmon.entities.pixelmon.EntityPixelmon;
 import com.pixelmonmod.pixelmon.enums.battle.EnumBattleType;
 import dev.rachamon.api.sponge.util.TextUtil;
-import dev.rachamon.api.sponge.util.chatquestion.ChatQuestion;
-import dev.rachamon.api.sponge.util.chatquestion.ChatQuestionAnswer;
 import dev.rachamon.rachamonpixelmonshowdown.RachamonPixelmonShowdown;
 import dev.rachamon.rachamonpixelmonshowdown.configs.BattleLeagueConfig;
 import dev.rachamon.rachamonpixelmonshowdown.configs.LanguageConfig;
@@ -38,6 +36,7 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
     private final RachamonPixelmonShowdown plugin = RachamonPixelmonShowdown.getInstance();
     private static boolean isRunning = false;
+    private static final ArrayList<UUID> promptQueue = new ArrayList<UUID>();
     private static Task matchMaker;
 
     /**
@@ -740,7 +739,7 @@ public class RachamonPixelmonShowdownMatchMakingManager {
             Text hover = TextUtil.toText(splitText[i]);
             display = display.append(hover);
 
-            if (i != splitText.length - 1) {
+            if (i < splitText.length - 1) {
                 display = display
                         .append(TextUtil.toText(this.plugin.getLanguage().getGeneralLanguageBattle().getHoverText()))
                         .onHover(TextActions.showText(TextUtil.toText(String.join("\n", banned))));
@@ -817,18 +816,63 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
     public void askForDraw(Player player) throws Exception {
 
+        Optional<Player> opponent = this.getOpponent(player);
+
+        LanguageConfig.GeneralLanguageBattle language = RachamonPixelmonShowdown
+                .getInstance()
+                .getLanguage()
+                .getGeneralLanguageBattle();
+
+        if (!opponent.isPresent()) {
+            return;
+        }
+
+        RachamonPixelmonShowdownMatchMakingManager.promptQueue.add(opponent.get().getUniqueId());
+
+        ChatUtil.sendMessage(player, language.getPlayerAskForDraw());
+        ChatUtil.sendMessage(opponent.get(), language.getOpponentAskForDraw());
+
+    }
+
+    public void acceptedDraw(Player player) throws Exception {
+        if (!RachamonPixelmonShowdownMatchMakingManager.promptQueue.contains(player.getUniqueId())) {
+            return;
+        }
+
         EntityPlayer ePlayer = (EntityPlayer) player;
+
         RachamonPixelmonShowdownQueueManager queueManager = RachamonPixelmonShowdown.getInstance().getQueueManager();
-
-        BattleControllerBase battleControllerBase = BattleRegistry.getBattle(ePlayer);
-        List<PlayerParticipant> playerParticipants = battleControllerBase.getPlayers();
-
-        UUID participant1 = playerParticipants.get(0).getEntity().getUniqueID();
-        UUID participant2 = playerParticipants.get(1).getEntity().getUniqueID();
-
         QueueService queueService = queueManager.getPlayerInMatch(player.getUniqueId());
+        LanguageConfig.GeneralLanguageBattle language = RachamonPixelmonShowdown
+                .getInstance()
+                .getLanguage()
+                .getGeneralLanguageBattle();
 
-        if (queueService == null) {
+        Optional<Player> opponent = this.getOpponent(player);
+
+        if (!opponent.isPresent()) {
+            return;
+        }
+
+        RachamonPixelmonShowdownMatchMakingManager.promptQueue.remove(player.getUniqueId());
+
+        queueService.resetPlayer(player.getUniqueId());
+        queueService.resetPlayer(opponent.get().getUniqueId());
+
+        if (BattleRegistry.getBattle(ePlayer) != null) {
+            BattleRegistry.getBattle(ePlayer).endBattle();
+        }
+
+        if (BattleRegistry.getBattle((EntityPlayerMP) opponent.get()) != null) {
+            BattleRegistry.getBattle((EntityPlayerMP) opponent.get()).endBattle();
+        }
+
+        ChatUtil.sendMessage(player, language.getSuccessfullyDraw());
+        ChatUtil.sendMessage(opponent.get(), language.getSuccessfullyDraw());
+    }
+
+    public void deniedDraw(Player player) throws Exception {
+        if (!RachamonPixelmonShowdownMatchMakingManager.promptQueue.contains(player.getUniqueId())) {
             return;
         }
 
@@ -837,47 +881,41 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                 .getLanguage()
                 .getGeneralLanguageBattle();
 
-        if (!queueService.isPlayerInMatch(participant1) || !queueService.isPlayerInMatch(participant2)) {
-            throw new Exception(language.getNotInBattle());
-        }
-
-        Optional<Player> opponent = Sponge.getServer().getPlayer(participant2);
+        Optional<Player> opponent = this.getOpponent(player);
 
         if (!opponent.isPresent()) {
             return;
         }
 
-        ChatUtil.sendMessage(player, language.getPlayerAskForDraw());
+        RachamonPixelmonShowdownMatchMakingManager.promptQueue.remove(player.getUniqueId());
 
-        ChatQuestion question = ChatQuestion
-                .of(TextUtil.toText(language.getOpponentAskForDraw()))
-                .addAnswer(ChatQuestionAnswer.of(TextUtil.toText(language.getAcceptText()), target -> {
-                    queueService.resetPlayer(participant1);
-                    queueService.resetPlayer(participant2);
+        ChatUtil.sendMessage(opponent.get(), language.getOpponentDecline());
+        ChatUtil.sendMessage(player, language.getYouDecline());
+    }
 
-                    if (BattleRegistry.getBattle(ePlayer) != null) {
-                        BattleRegistry.getBattle(ePlayer).endBattle();
-                    }
+    private Optional<Player> getOpponent(Player player) throws Exception {
+        EntityPlayer ePlayer = (EntityPlayer) player;
+        QueueService queueService = RachamonPixelmonShowdown
+                .getInstance()
+                .getQueueManager()
+                .getPlayerInMatch(player.getUniqueId());
+        LanguageConfig.GeneralLanguageBattle language = RachamonPixelmonShowdown
+                .getInstance()
+                .getLanguage()
+                .getGeneralLanguageBattle();
 
-                    if (BattleRegistry.getBattle((EntityPlayerMP) opponent.get()) != null) {
-                        BattleRegistry.getBattle((EntityPlayerMP) opponent.get()).endBattle();
-                    }
+        BattleControllerBase battleControllerBase = BattleRegistry.getBattle(ePlayer);
+        List<PlayerParticipant> playerParticipants = battleControllerBase.getPlayers();
 
-                    ChatUtil.sendMessage(player, language.getSuccessfullyDraw());
-                    ChatUtil.sendMessage(opponent.get(), language.getSuccessfullyDraw());
-                }))
-                .addAnswer(ChatQuestionAnswer.of(TextUtil.toText(language.getDeclineText()), target -> {
-                    ChatUtil.sendMessage(player, language.getOpponentDecline());
-                }))
-                .build();
+        UUID participant1 = ((Player) playerParticipants.get(0).getEntity()).getUniqueId();
+        UUID participant2 = ((Player) playerParticipants.get(1).getEntity()).getUniqueId();
 
-        question.setAlreadyResponse(TextUtil.toText(language.getAlreadyResponded()));
-        question.setClickToAnswer(TextUtil.toText(language.getClickToAnswer()));
-        question.setClickToView(TextUtil.toText(language.getClickToView()));
-        question.setMustBePlayer(TextUtil.toText(language.getMustBePlayer()));
 
-        question.pollChat(opponent.get());
+        if (!queueService.isPlayerInMatch(participant1) || !queueService.isPlayerInMatch(participant2)) {
+            throw new Exception(language.getNotInBattle());
+        }
 
+        return Sponge.getServer().getPlayer(participant1 == player.getUniqueId() ? participant2 : participant1);
     }
 
 }
