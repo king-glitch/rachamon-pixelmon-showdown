@@ -60,6 +60,7 @@ public class RachamonPixelmonShowdownEloManager {
     public void addPlayer(UUID uuid) {
         this.playerDataService.addPlayer(uuid, profile -> {
             this.cache.put(uuid, profile);
+            this.sort();
         });
     }
 

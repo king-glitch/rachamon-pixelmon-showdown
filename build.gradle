@@ -54,7 +54,7 @@ dependencies {
     minecraft 'net.minecraftforge:forge:' + forgeVersion
     compileOnly 'org.spongepowered:spongeapi:' + spongeVersion
     compileOnly 'pixelmon:Pixelmon-1.12.2-' + pixelmonVersion + '-server:' + pixelmonVersion
-    shadow 'com.github.king-glitch:sponge-plugin-api:4e22a65759'
+    shadow 'com.github.king-glitch:sponge-plugin-api:204bbb9a21'
 }
 
 shadowJar {

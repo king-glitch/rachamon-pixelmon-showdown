@@ -1,6 +1,7 @@
 package dev.rachamon.rachamonpixelmonshowdown.services;
 
 import dev.rachamon.api.common.database.MySQLConnectorProvider;
+import dev.rachamon.api.common.database.SQLiteConnectorProvider;
 import dev.rachamon.rachamonpixelmonshowdown.RachamonPixelmonShowdown;
 import dev.rachamon.rachamonpixelmonshowdown.structures.PlayerEloProfile;
 import org.spongepowered.api.Sponge;
@@ -33,32 +34,6 @@ public class PlayerDataService {
     /**
      * Add player.
      *
-     * @param uuid the uuid
-     */
-    public void addPlayer(UUID uuid) {
-        this.hasPlayer(uuid, (bool) -> {
-            if (bool) {
-                return;
-            }
-
-            this.plugin.getDatabaseConnector().connect(connection -> {
-                String SQL = "INSERT INTO showdown_playerdata (uuid, league_type, elo) VALUES (?,?,?)";
-                try (PreparedStatement statement = connection.prepareStatement(SQL)) {
-                    statement.setString(1, uuid.toString());
-                    statement.setString(2, this.leagueName);
-                    statement.setInt(3, 1000);
-                    statement.executeUpdate();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    this.plugin.getLogger().error("error on add player data;");
-                }
-            });
-        });
-    }
-
-    /**
-     * Add player.
-     *
      * @param uuid     the uuid
      * @param callback the callback
      */
@@ -66,6 +41,7 @@ public class PlayerDataService {
         this.hasPlayer(uuid, (bool) -> {
 
             if (bool) {
+                this.plugin.getLogger().debug("getting - player data to database;");
                 this.getPlayer(uuid, callback);
                 return;
             }
@@ -77,11 +53,14 @@ public class PlayerDataService {
                     statement.setString(2, this.leagueName);
                     statement.setInt(3, 1000);
                     statement.executeUpdate();
-                    this.getPlayer(uuid, callback);
+                    statement.close();
                     this.plugin.getLogger().debug("adding player data to database;");
-                } catch (Exception e) {
                     this.getPlayer(uuid, callback);
+                } catch (Exception e) {
+                    e.printStackTrace();
                     this.plugin.getLogger().error("error on add player data;");
+                    this.getPlayer(uuid, callback);
+
                 }
             });
         });
@@ -125,8 +104,11 @@ public class PlayerDataService {
                 statement.setString(1, uuid.toString());
                 statement.setString(2, this.leagueName);
                 ResultSet result = statement.executeQuery();
+                statement.close();
                 if (result.next()) {
                     callback.accept(result.getInt("amount") > 0);
+                } else {
+                    callback.accept(false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -160,18 +142,24 @@ public class PlayerDataService {
     private void getWinLose(UUID uuid, Consumer<Integer> callback, String SQL) {
         this.plugin.getDatabaseConnector().connect(connection -> {
             try (PreparedStatement statement = connection.prepareStatement(SQL)) {
+                this.plugin.getLogger().debug("getting win lose data.");
+
                 statement.setString(1, uuid.toString());
                 statement.setString(2, leagueName);
                 ResultSet result = statement.executeQuery();
+                statement.close();
+
                 if (!result.next()) {
                     this.plugin.getLogger().debug("getting win lose data not found");
                     callback.accept(0);
                     return;
                 }
+
                 int amount = result.getInt("amount");
                 callback.accept(amount);
                 this.plugin.getLogger().debug("getting win lose:  " + amount);
             } catch (Exception e) {
+                e.printStackTrace();
                 this.plugin.getLogger().error("error on get player wins loses;");
                 callback.accept(0);
             }
@@ -185,30 +173,54 @@ public class PlayerDataService {
      * @param callback the callback
      */
     public void getPlayer(UUID uuid, Consumer<PlayerEloProfile> callback) {
-        this.plugin.getLogger().debug("getting player " + uuid + " data in database");
         String SQL = "SELECT * FROM showdown_playerdata WHERE uuid = ? AND league_type = ?";
         this.plugin.getDatabaseConnector().connect(connection -> {
             try (PreparedStatement statement = connection.prepareStatement(SQL)) {
+
+                this.plugin.getLogger().debug("getting player " + uuid + " data in database");
+
                 statement.setString(1, uuid.toString());
                 statement.setString(2, this.leagueName);
                 ResultSet result = statement.executeQuery();
+                statement.close();
+
                 if (!result.next()) {
+                    this.plugin.getLogger().debug("no player " + uuid + " data in database");
+
                     callback.accept(null);
                     return;
                 }
 
+
+
                 int elo = result.getInt("elo");
 
+                this.plugin.getLogger().debug("done getting player " + uuid + " data in database");
+
                 this.getPlayerWins(uuid, (w) -> {
+                    this.plugin.getLogger().debug("getting wins player " + uuid + " data in database");
+
                     this.getPlayerLoses(uuid, l -> {
+                        this.plugin.getLogger().debug("getting loses player " + uuid + " data in database");
+
                         this.plugin.getLogger().debug("profile: " + uuid);
-                        callback.accept(new PlayerEloProfile(uuid, this.leagueName, elo, w, l));
+                        try {
+                            this.plugin
+                                    .getQueueManager()
+                                    .findQueue(leagueName)
+                                    .getEloManager()
+                                    .updatePlayer(uuid, new PlayerEloProfile(uuid, elo, w, l));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        callback.accept(new PlayerEloProfile(uuid, elo, w, l));
                     });
                 });
 
             } catch (Exception e) {
                 e.printStackTrace();
                 this.plugin.getLogger().error("error on add player data;");
+                callback.accept(null);
             }
         });
     }
@@ -226,19 +238,23 @@ public class PlayerDataService {
             try (PreparedStatement statement = connection.prepareStatement(SQL)) {
                 statement.setString(1, leagueName);
                 ResultSet result = statement.executeQuery();
+                statement.close();
+
                 while (result.next()) {
                     String _uuid = result.getString("uuid");
                     int elo = result.getInt("elo");
                     UUID uuid = UUID.fromString(_uuid);
-                    PlayerEloProfile profile = new PlayerEloProfile(uuid, leagueName, elo);
+                    PlayerEloProfile profile = new PlayerEloProfile(uuid);
                     this.getPlayerWins(uuid, w -> {
-                        profile.setWin(w);
                         this.getPlayerLoses(uuid, l -> {
+                            profile.setWin(w);
                             profile.setLose(l);
+                            profile.setElo(elo);
                             players.put(uuid, profile);
                         });
                     });
                 }
+
             } catch (Exception e) {
                 e.printStackTrace();
                 this.plugin.getLogger().error("error on add player data;");
@@ -251,11 +267,15 @@ public class PlayerDataService {
      * Initialize database.
      */
     public static void initialize() {
-        String autoIncrement = "";
 
         RachamonPixelmonShowdown.getInstance().getDatabaseConnector().connect(connection -> {
             try (Statement statement = connection.createStatement()) {
-                statement.execute("CREATE TABLE showdown_playerdata (" + "id INTEGER PRIMARY KEY " + autoIncrement + ", " + "uuid VARCHAR(36) NOT NULL, " + "elo INTEGER NOT NULL," + "league_type VARCHAR NOT NULL, " + "UNIQUE (league_type, uuid) ON CONFLICT ABORT)");
+
+                boolean isSQLite = RachamonPixelmonShowdown
+                        .getInstance()
+                        .getDatabaseConnector() instanceof SQLiteConnectorProvider;
+
+                statement.execute(isSQLite ? "CREATE TABLE showdown_playerdata (" + "id INTEGER PRIMARY KEY, " + "uuid VARCHAR(36) NOT NULL, " + "elo INTEGER NOT NULL," + "league_type VARCHAR NOT NULL, " + "UNIQUE (league_type, uuid) ON CONFLICT ABORT)" : "CREATE TABLE `showdown_playerdata` (" + "`id` INTEGER AUTO_INCREMENT PRIMARY KEY ," + "`uuid` varchar(36) DEFAULT NULL," + "`elo` smallint(6) DEFAULT NULL," + "`league_type` varchar(3) DEFAULT NULL," + "UNIQUE KEY(uuid, league_type)" + ");");
             } catch (Exception e) {
                 e.printStackTrace();
                 RachamonPixelmonShowdown.getInstance().getLogger().error("error on initializing playerdata database.");

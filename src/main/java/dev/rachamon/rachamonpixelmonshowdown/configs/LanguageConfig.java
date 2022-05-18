@@ -171,26 +171,26 @@ public class LanguageConfig {
          * The League leaderboard value.
          */
         @Setting(value = "league-leaderboard-value", comment = "leaderboard value info")
-        protected String leagueLeaderboardValue = "&c{rank}&7. &a&l{player}&r &aelo&8: &a&l{elo}&r.";
+        protected String leagueLeaderboardValue = "&4&l{rank}&7. &a&l{player}&7: &aelo &8-> &a&l{elo}&r &8(&5Win Rate&8: &a&l{win-rate} &6%&8)";
 
         /**
          * The League stats value.
          */
         @Setting(value = "league-stats-value", comment = "stats value info")
-        protected List<String> leagueStatsValue = Arrays.asList("", "&2&lElo&8: &a{league-name}", "&2&lElo: &8: &a{elo}", "&2&lWin-rate: &8: &a{win-rate}", "&2&lWins: &8: &a{wins}", "&2&lLoses: &8: &a{loses}", "");
+        protected List<String> leagueStatsValue = Arrays.asList("", "&2&nLeague&r &8-> &a{league-name}", "&2&nElo&r &8-> &a{elo}", "&2&nWin Rate&r &8-> &a{win-rate} &6%", "&2&nWins&r &8-> &a{wins}", "&2&nLoses&r &8-> &a{loses}", "");
 
         @Setting(value = "league-battle-rules", comment = "battle rules value info")
         protected List<String> leagueBattleRules = Arrays.asList(
                 "",
-                "&2&lBattle Type&8: &a{type}",
-                "&2&lLevel Capacity&8: &a{level-capacity}",
-                "&2&lRaise level to capacity&8: &a{raise-cap}",
-                "&2&lTeam Preview&8: &a{team-preview}",
-                "&2&lTurn Time&8: &a{turn-time}",
-                "&2&lPokemon banned&8: {hover-pokemon-banned}",
-                "&2&lMove banned&8: {hover-move-banned}",
-                "&2&lAbility banned&8: {hover-ability-banned}",
-                "&2&lItem banned&8: {hover-item-banned}",
+                "&2Battle Type &8-> &a{type}",
+                "&2Level Capacity &8-> &a{level-capacity}",
+                "&2Raise level to capacity &8-> &a{raise-cap}",
+                "&2Team Preview &8-> &a{team-preview}",
+                "&2Turn Time &8-> &a{turn-time}",
+                "&2Pokemon banned &8-> {hover-pokemon-banned}",
+                "&2Move banned &8-> {hover-move-banned}",
+                "&2Ability banned &8-> {hover-ability-banned}",
+                "&2Item banned &8-> {hover-item-banned}",
                 ""
 
         );

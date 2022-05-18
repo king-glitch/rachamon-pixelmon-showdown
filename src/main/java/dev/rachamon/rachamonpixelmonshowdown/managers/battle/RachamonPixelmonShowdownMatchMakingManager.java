@@ -583,7 +583,8 @@ public class RachamonPixelmonShowdownMatchMakingManager {
         int wins = profile.getWin();
         int loses = profile.getLose();
         int elo = profile.getElo();
-        double winRate = Math.round(wins * 100.0 / (wins + loses));
+        double winRate = profile.getWinRate();
+
 
         PaginationList.Builder builder = PaginationList
                 .builder()
@@ -637,14 +638,15 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                     .getGeneralLanguageBattle()
                     .getLeagueLeaderboardValue()
                     .replaceAll("\\{rank}", String.valueOf(i))
+                    .replaceAll("\\{win-rate}", (profile.getWinRate() >= 50 ? "&a&l" : "&4&l") + profile.getWinRate())
+                    .replaceAll("\\{elo}", String.valueOf(profile.getElo()))
                     .replaceAll("\\{player}", Objects
                             .requireNonNull(Objects.requireNonNull(Sponge
                                     .getServiceManager()
                                     .provide(UserStorageService.class)
                                     .flatMap(storage -> storage.get(uuid))
                                     .orElse(null)))
-                            .getName())
-                    .replaceAll("\\{elo}", String.valueOf(profile.getElo()));
+                            .getName());
             contents.add(TextUtil.toText(text));
             i++;
         }
@@ -735,15 +737,12 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
         String[] splitText = text.split(containText);
 
-        for (int i = 0; i < splitText.length; i++) {
-            Text hover = TextUtil.toText(splitText[i]);
+        for (String s : splitText) {
+            Text hover = TextUtil.toText(s);
             display = display.append(hover);
-
-            if (i < splitText.length - 1) {
-                display = display
-                        .append(TextUtil.toText(this.plugin.getLanguage().getGeneralLanguageBattle().getHoverText()))
-                        .onHover(TextActions.showText(TextUtil.toText(String.join("\n", banned))));
-            }
+            display = display
+                    .append(TextUtil.toText(this.plugin.getLanguage().getGeneralLanguageBattle().getHoverText()))
+                    .onHover(TextActions.showText(TextUtil.toText(String.join("\n", banned))));
         }
     }
 

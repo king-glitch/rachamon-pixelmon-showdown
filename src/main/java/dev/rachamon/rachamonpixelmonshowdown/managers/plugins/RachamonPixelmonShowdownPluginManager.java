@@ -48,7 +48,7 @@ public class RachamonPixelmonShowdownPluginManager implements IRachamonPluginMan
                 MainConfig.DatabaseCategorySetting databaseCategorySetting = this.plugin
                         .getConfig()
                         .getDatabaseCategorySetting();
-                this.plugin.setDatabaseConnector(new MySQLConnectorProvider(databaseCategorySetting.getHostName(), databaseCategorySetting.getPort(), databaseCategorySetting.getDatabaseName(), databaseCategorySetting.getUsername(), databaseCategorySetting.getPassword(), databaseCategorySetting.getEnableSSL()));
+                this.plugin.setDatabaseConnector(new MySQLConnectorProvider(databaseCategorySetting.getHostName(), databaseCategorySetting.getPort(), databaseCategorySetting.getDatabaseName(), databaseCategorySetting.getUsername(), databaseCategorySetting.getPassword(), databaseCategorySetting.getEnableSSL(), 10));
                 this.plugin.getLogger().info("Data handler connected using MySQL.");
             } else {
                 this.plugin.setDatabaseConnector(new SQLiteConnectorProvider(this.plugin

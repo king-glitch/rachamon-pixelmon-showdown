@@ -7,7 +7,6 @@ import java.util.UUID;
  */
 public class PlayerEloProfile {
     private UUID uuid;
-    private String leagueName;
     private int win;
     private int lose;
     private int elo;
@@ -15,12 +14,10 @@ public class PlayerEloProfile {
     /**
      * Instantiates a new Player elo profile.
      *
-     * @param uuid       the uuid
-     * @param leagueName the league name
+     * @param uuid the uuid
      */
-    public PlayerEloProfile(UUID uuid, String leagueName) {
+    public PlayerEloProfile(UUID uuid) {
         this.uuid = uuid;
-        this.leagueName = leagueName;
         this.win = 0;
         this.lose = 0;
         this.elo = 0;
@@ -29,13 +26,11 @@ public class PlayerEloProfile {
     /**
      * Instantiates a new Player elo profile.
      *
-     * @param uuid       the uuid
-     * @param leagueName the league name
-     * @param elo        the elo
+     * @param uuid the uuid
+     * @param elo  the elo
      */
-    public PlayerEloProfile(UUID uuid, String leagueName, int elo) {
+    public PlayerEloProfile(UUID uuid, int elo) {
         this.uuid = uuid;
-        this.leagueName = leagueName;
         this.elo = elo;
         this.win = 0;
         this.lose = 0;
@@ -44,15 +39,13 @@ public class PlayerEloProfile {
     /**
      * Instantiates a new Player elo profile.
      *
-     * @param uuid       the uuid
-     * @param leagueName the league name
-     * @param elo        the elo
-     * @param win        the win
-     * @param lose       the lose
+     * @param uuid the uuid
+     * @param elo  the elo
+     * @param win  the win
+     * @param lose the lose
      */
-    public PlayerEloProfile(UUID uuid, String leagueName, int elo, int win, int lose) {
+    public PlayerEloProfile(UUID uuid, int elo, int win, int lose) {
         this.uuid = uuid;
-        this.leagueName = leagueName;
         this.elo = elo;
         this.win = win;
         this.lose = lose;
@@ -74,24 +67,6 @@ public class PlayerEloProfile {
      */
     public void setUuid(UUID uuid) {
         this.uuid = uuid;
-    }
-
-    /**
-     * Gets league name.
-     *
-     * @return the league name
-     */
-    public String getLeagueName() {
-        return leagueName;
-    }
-
-    /**
-     * Sets league name.
-     *
-     * @param leagueName the league name
-     */
-    public void setLeagueName(String leagueName) {
-        this.leagueName = leagueName;
     }
 
     /**
@@ -146,5 +121,9 @@ public class PlayerEloProfile {
      */
     public void setElo(int elo) {
         this.elo = elo;
+    }
+
+    public double getWinRate() {
+        return Math.round(this.getWin() * 100.0 / (this.getWin() + this.getLose()));
     }
 }
