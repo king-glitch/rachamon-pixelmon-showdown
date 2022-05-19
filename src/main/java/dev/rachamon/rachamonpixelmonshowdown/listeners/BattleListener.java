@@ -116,9 +116,7 @@ public class BattleListener {
      */
     @Listener
     public void onPlayerQuit(ClientConnectionEvent.Disconnect event) {
-        RachamonPixelmonShowdownQueueManager queueManager = RachamonPixelmonShowdown
-                .getInstance()
-                .getQueueManager();
+        RachamonPixelmonShowdownQueueManager queueManager = RachamonPixelmonShowdown.getInstance().getQueueManager();
         UUID uuid = event.getTargetEntity().getUniqueId();
 
         if (!queueManager.isPlayerInAction(uuid)) {
@@ -148,46 +146,44 @@ public class BattleListener {
             return;
         }
 
-        RachamonPixelmonShowdownQueueManager queueManager = RachamonPixelmonShowdown
-                .getInstance()
-                .getQueueManager();
+        RachamonPixelmonShowdownQueueManager queueManager = RachamonPixelmonShowdown.getInstance().getQueueManager();
 
-        Player winner = (Player) event.getSource();
-        UUID winnerUuid = winner.getUniqueId();
+        Player loser = (Player) event.getSource();
+        UUID loserUuid = loser.getUniqueId();
 
-        Player loser;
-        UUID loserUuid;
+        Player winner;
+        UUID winnerUuid;
 
-        if (!queueManager.isPlayerInMatch(winnerUuid)) {
+        if (!queueManager.isPlayerInMatch(loserUuid)) {
             return;
         }
 
         try {
-            QueueService queueService = queueManager.getPlayerInMatch(winnerUuid);
+            QueueService queueService = queueManager.getPlayerInMatch(loserUuid);
 
-            EntityPlayer ePlayer = (EntityPlayer) winner;
+            EntityPlayer ePlayer = (EntityPlayer) loser;
             BattleControllerBase battleControllerBase = BattleRegistry.getBattle(ePlayer);
             List<PlayerParticipant> playerParticipants = battleControllerBase.getPlayers();
 
-            UUID participant1 = playerParticipants.get(0).getEntity().getUniqueID();
-            UUID participant2 = playerParticipants.get(1).getEntity().getUniqueID();
+            UUID participant1 = ((Player) playerParticipants.get(0).getEntity()).getUniqueId();
+            UUID participant2 = ((Player) playerParticipants.get(1).getEntity()).getUniqueId();
 
-            if (winner.getUniqueId().equals(participant1)) {
-                loser = Sponge.getServer().getPlayer(participant2).orElse(null);
+            if (loser.getUniqueId().equals(participant1)) {
+                winner = Sponge.getServer().getPlayer(participant2).orElse(null);
             } else {
-                loser = Sponge.getServer().getPlayer(participant1).orElse(null);
+                winner = Sponge.getServer().getPlayer(participant1).orElse(null);
             }
 
-            if (loser == null) {
+            if (winner == null) {
                 return;
             }
 
-            loserUuid = loser.getUniqueId();
+            winnerUuid = winner.getUniqueId();
 
             RachamonPixelmonShowdownEloManager eloManager = queueService.getEloManager();
 
-            PlayerEloProfile eloWinnerProfile = eloManager.getProfileData(winnerUuid);
             PlayerEloProfile eloLoserProfile = eloManager.getProfileData(loserUuid);
+            PlayerEloProfile eloWinnerProfile = eloManager.getProfileData(winnerUuid);
 
             this.processElo(winner, winnerUuid, loser, loserUuid, queueService, eloManager, eloWinnerProfile, eloLoserProfile);
         } catch (Exception ignored) {
@@ -195,9 +191,7 @@ public class BattleListener {
         }
     }
 
-    private void processElo(Player winner, UUID winnerUuid, Player loser, UUID loserUuid, QueueService
-            queueService, RachamonPixelmonShowdownEloManager eloManager, PlayerEloProfile eloWinnerProfile, PlayerEloProfile
-                                    eloLoserProfile) {
+    private void processElo(Player winner, UUID winnerUuid, Player loser, UUID loserUuid, QueueService queueService, RachamonPixelmonShowdownEloManager eloManager, PlayerEloProfile eloWinnerProfile, PlayerEloProfile eloLoserProfile) {
         int winnerElo = eloWinnerProfile.getElo();
         int loserElo = eloLoserProfile.getElo();
 
@@ -242,9 +236,7 @@ public class BattleListener {
         eloManager.sort();
     }
 
-    private void runPostBattle(boolean force, BattleEndEvent event, PlayerParticipant participant1, UUID
-            playerUuid1, UUID playerUuid2, Player player1, Player player2, QueueService
-                                       queue, RachamonPixelmonShowdownEloManager eloManager) {
+    private void runPostBattle(boolean force, BattleEndEvent event, PlayerParticipant participant1, UUID playerUuid1, UUID playerUuid2, Player player1, Player player2, QueueService queue, RachamonPixelmonShowdownEloManager eloManager) {
         boolean isPlayerOneWin = event.results.get(participant1) == BattleResults.VICTORY;
 
         if (force) {

@@ -149,6 +149,11 @@ public class LanguageConfig {
         @Setting(value = "player-enter-queue", comment = "when player enter the queue")
         protected String playerEnterQueue = "&aYou have entered league {league} queue.";
 
+        @Setting(value = "invalid-team-validated", comment = "player team is invalid")
+        protected String invalidTeamValidated = "&cYour team &4&l{validate}&c does not valid. please use correct team format.";
+        @Setting(value = "invalid-team-size", comment = "player invalid team size")
+        protected String invalidTeamSize = "&cYour team size is too big. allowed &4&l{allowed}&c pokemons";
+
         /**
          * The Player leave queue.
          */
@@ -430,6 +435,14 @@ public class LanguageConfig {
 
         public String getOpponentAskForDraw() {
             return opponentAskForDraw;
+        }
+
+        public String getInvalidTeamValidated() {
+            return invalidTeamValidated;
+        }
+
+        public String getInvalidTeamSize() {
+            return invalidTeamSize;
         }
     }
 

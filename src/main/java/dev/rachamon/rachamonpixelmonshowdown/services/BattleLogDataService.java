@@ -41,7 +41,7 @@ public class BattleLogDataService {
                         "  `loser_uuid` varchar(36) DEFAULT NULL,\n" +
                         "  `winner_point` tinyint(4) DEFAULT NULL,\n" +
                         "  `loser_point` tinyint(4) DEFAULT NULL,\n" +
-                        "  `league_type` varchar(3) DEFAULT NULL,\n" +
+                        "  `league_type` varchar(40) DEFAULT NULL,\n" +
                         "  `created_at` varchar(0) DEFAULT NULL\n" +
                         ") ");
             } catch (Exception e) {

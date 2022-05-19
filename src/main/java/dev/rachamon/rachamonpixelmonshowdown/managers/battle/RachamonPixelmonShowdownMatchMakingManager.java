@@ -704,7 +704,7 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                 this.addHoverText(text, "\\{hover-ability-banned}", display, queueService
                         .getRuleManager()
                         .getLeague()
-                        .getAbilities());
+                        .getAbilityClause());
             }
 
             if (text.contains("{hover-move-banned}")) {
@@ -795,10 +795,26 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
         BattleRules rules = queueService.getRuleManager().getBattleRules();
 
+        if (pokemonArrayList.size() > rules.numPokemon) {
+            throw new Exception(this.plugin
+                    .getLanguage()
+                    .getGeneralLanguageBattle()
+                    .getInvalidTeamSize()
+                    .replaceAll("\\{allowed}", rules.numPokemon + ""));
+        }
+
         boolean isTeamValidate = rules.validateTeam(pokemonArrayList) == null;
 
         if (!isTeamValidate) {
-            return;
+
+
+            this.plugin.getLogger().debug(rules.validateTeam(pokemonArrayList));
+
+            throw new Exception(this.plugin
+                    .getLanguage()
+                    .getGeneralLanguageBattle()
+                    .getInvalidTeamValidated()
+                    .replaceAll("\\{validate}", rules.validateTeam(pokemonArrayList)));
         }
 
         queueService.addPlayerInQueue(player.getUniqueId());

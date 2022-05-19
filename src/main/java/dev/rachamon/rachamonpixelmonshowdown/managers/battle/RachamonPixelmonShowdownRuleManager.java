@@ -5,11 +5,16 @@ import com.pixelmonmod.pixelmon.battles.rules.clauses.*;
 import com.pixelmonmod.pixelmon.entities.npcs.registry.PokemonForm;
 import com.pixelmonmod.pixelmon.entities.pixelmon.abilities.AbilityBase;
 import com.pixelmonmod.pixelmon.enums.EnumSpecies;
+import com.pixelmonmod.pixelmon.enums.EnumType;
 import com.pixelmonmod.pixelmon.enums.battle.EnumBattleType;
 import com.pixelmonmod.pixelmon.enums.forms.IEnumForm;
 import com.pixelmonmod.pixelmon.enums.heldItems.EnumHeldItems;
 import dev.rachamon.rachamonpixelmonshowdown.RachamonPixelmonShowdown;
 import dev.rachamon.rachamonpixelmonshowdown.configs.BattleLeagueConfig;
+import dev.rachamon.rachamonpixelmonshowdown.structures.clauses.DuplicateItemClause;
+import dev.rachamon.rachamonpixelmonshowdown.structures.clauses.DuplicatePokemonClause;
+import dev.rachamon.rachamonpixelmonshowdown.structures.clauses.LegendaryLimitClause;
+import dev.rachamon.rachamonpixelmonshowdown.structures.clauses.MonoTypeClause;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,7 +87,9 @@ public class RachamonPixelmonShowdownRuleManager {
                 }
 
                 pokemonForm.get().form = castForm.getForm();
-                return new PokemonClause(pokemonName, pokemonForm.get());
+                PokemonClause clause = new PokemonClause(pokemonName, pokemonForm.get());
+                clause.setDescription(pokemonName + " are not allowed in the party");
+                return clause;
             }
         }
 
@@ -307,7 +314,7 @@ public class RachamonPixelmonShowdownRuleManager {
             this.addMoveClause(pokemon);
         }
 
-        for (String pokemon : this.league.getAbilities()) {
+        for (String pokemon : this.league.getAbilityClause()) {
             this.addAbilityClause(pokemon);
         }
 
@@ -341,11 +348,37 @@ public class RachamonPixelmonShowdownRuleManager {
             clauses.add(new BattleClause("bag"));
         }
 
+        if (this.league.getMonotypeClause() != null && !this.league.getMonotypeClause().isEmpty()) {
+            EnumType type = EnumType.parseType(this.league.getMonotypeClause());
+            if (type == null) {
+                RachamonPixelmonShowdown
+                        .getInstance()
+                        .getLogger()
+                        .error("Error Adding Monotype Clause: " + this.league.getMonotypeClause() + ". Please check format config for errors.");
+            } else {
+                clauses.add(new MonoTypeClause("Monotype", type));
+            }
+        }
+
+        if (this.league.getLegendaryLimitClause() > 0) {
+            clauses.add(new LegendaryLimitClause("LegendaryLimit", this.league.getLegendaryLimitClause()));
+        }
+
+        if (!this.league.isAllowDuplicateItemClause()) {
+            clauses.add(new DuplicateItemClause("DuplicateItem"));
+        }
+
+        if (!this.league.isAllowDuplicatePokemonClause()) {
+            clauses.add(new DuplicatePokemonClause("DuplicatePokemon"));
+        }
+
         clauses.addAll(pokemonClauses);
         clauses.addAll(moveClauses);
         clauses.addAll(abilityClauses);
         clauses.addAll(complexClauses);
         clauses.addAll(itemPreventClauses);
+
+        this.battleRules.setNewClauses(clauses);
 
         return this;
 

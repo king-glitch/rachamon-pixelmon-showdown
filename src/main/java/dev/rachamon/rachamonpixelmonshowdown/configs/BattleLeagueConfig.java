@@ -21,8 +21,25 @@ public class BattleLeagueConfig {
 
     private Map<String, League> initialize() {
         Map<String, League> leagues = new HashMap<>();
-        BattleRule battleRule = new BattleRule(60, 100, 6, true, true, true, true, true);
-        leagues.put("vgc", new League(battleRule, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+        BattleRule battleRule = new BattleRule(45, 50, 4, true, true, true, true, true);
+        leagues.put("vcg-series-12", new League(battleRule, new ArrayList<>(), new ArrayList<String>() {{
+            add("Mew");
+            add("Celebi");
+            add("Jirachi");
+            add("Victini");
+            add("Keldeo");
+            add("Genesect");
+            add("Diancie");
+            add("Volcanion");
+            add("Magearna");
+            add("Marshadow");
+            add("Zeraora");
+            add("Meltan");
+            add("Melmetal");
+            add("Zarude");
+
+
+        }}, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), null, 2, false, false));
         return leagues;
     }
 
@@ -76,25 +93,33 @@ public class BattleLeagueConfig {
          * The Abilities.
          */
         @Setting(value = "ability-clause", comment = "The particular abilities you want it banned.")
-        protected List<String> abilities = new ArrayList<>();
+        protected List<String> abilityClause = new ArrayList<>();
 
-        /**
-         * Instantiates a new League.
-         *
-         * @param battleRule     the battle rule
-         * @param complexClaus   the complex claus
-         * @param pokemonClaus   the Pokémon claus
-         * @param moveClaus      the move claus
-         * @param heldItemClause the held item clause
-         * @param abilities      the abilities
-         */
-        public League(BattleRule battleRule, List<ComplexClaus> complexClaus, List<String> pokemonClaus, List<String> moveClaus, List<String> heldItemClause, List<String> abilities) {
+        @Nullable
+        @Setting(value = "monotype-clause", comment = "The particular type you want it banned.")
+        protected String monotypeClause = null;
+
+        @Setting(value = "legendary-limit-clause", comment = "Limit the amount of legendary.")
+        protected int legendaryLimitClause = 6;
+
+        @Setting(value = "allow-duplicate-item-clause", comment = "Allow same item in the party.")
+        protected boolean allowDuplicateItemClause = false;
+
+        @Setting(value = "allow-duplicate-pokemon-clause", comment = "Allow same pokemon in the party.")
+        protected boolean allowDuplicatePokemonClause = false;
+
+
+        public League(BattleRule battleRule, List<ComplexClaus> complexClaus, List<String> pokemonClaus, List<String> moveClaus, List<String> heldItemClause, List<String> abilities, @Nullable String monotypeClause, int legendaryLimitClause, boolean allowDuplicateItemClause, boolean allowDuplicatePokemonClause) {
             this.battleRule = battleRule;
             this.complexClaus = complexClaus;
             this.pokemonClaus = pokemonClaus;
             this.moveClaus = moveClaus;
             this.heldItemClause = heldItemClause;
-            this.abilities = abilities;
+            this.abilityClause = abilities;
+            this.monotypeClause = monotypeClause;
+            this.legendaryLimitClause = legendaryLimitClause;
+            this.allowDuplicateItemClause = allowDuplicateItemClause;
+            this.allowDuplicatePokemonClause = allowDuplicatePokemonClause;
         }
 
         /**
@@ -147,8 +172,25 @@ public class BattleLeagueConfig {
          *
          * @return the abilities
          */
-        public List<String> getAbilities() {
-            return this.abilities;
+        public List<String> getAbilityClause() {
+            return this.abilityClause;
+        }
+
+        @Nullable
+        public String getMonotypeClause() {
+            return monotypeClause;
+        }
+
+        public int getLegendaryLimitClause() {
+            return legendaryLimitClause;
+        }
+
+        public boolean isAllowDuplicateItemClause() {
+            return allowDuplicateItemClause;
+        }
+
+        public boolean isAllowDuplicatePokemonClause() {
+            return allowDuplicatePokemonClause;
         }
     }
 
