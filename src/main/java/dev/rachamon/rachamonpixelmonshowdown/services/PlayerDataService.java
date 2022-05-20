@@ -277,7 +277,6 @@ public class PlayerDataService {
 
                 statement.execute(isSQLite ? "CREATE TABLE showdown_playerdata (" + "id INTEGER PRIMARY KEY, " + "uuid VARCHAR(36) NOT NULL, " + "elo INTEGER NOT NULL," + "league_type VARCHAR(50) NOT NULL, " + "UNIQUE (league_type, uuid) ON CONFLICT ABORT)" : "CREATE TABLE `showdown_playerdata` (" + "`id` INTEGER AUTO_INCREMENT PRIMARY KEY ," + "`uuid` varchar(36) DEFAULT NULL," + "`elo` smallint(6) DEFAULT NULL," + "`league_type` varchar(40) DEFAULT NULL," + "UNIQUE KEY(uuid, league_type)" + ");");
             } catch (Exception e) {
-                e.printStackTrace();
                 RachamonPixelmonShowdown.getInstance().getLogger().error("error on initializing playerdata database.");
             }
         });

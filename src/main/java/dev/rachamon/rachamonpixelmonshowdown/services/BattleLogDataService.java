@@ -1,6 +1,5 @@
 package dev.rachamon.rachamonpixelmonshowdown.services;
 
-import dev.rachamon.api.common.database.MySQLConnectorProvider;
 import dev.rachamon.api.common.database.SQLiteConnectorProvider;
 import dev.rachamon.rachamonpixelmonshowdown.RachamonPixelmonShowdown;
 
@@ -45,7 +44,6 @@ public class BattleLogDataService {
                         "  `created_at` varchar(0) DEFAULT NULL\n" +
                         ") ");
             } catch (Exception e) {
-                e.printStackTrace();
                 RachamonPixelmonShowdown.getInstance().getLogger().error("error on initializing log database.");
             }
         });
