@@ -14,7 +14,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * The type League draw response command element.
+ */
 public class LeagueDrawResponseCommandElement extends CommandElement {
+    /**
+     * Instantiates a new League draw response command element.
+     *
+     * @param key the key
+     */
     public LeagueDrawResponseCommandElement(@Nullable Text key) {
         super(key);
     }

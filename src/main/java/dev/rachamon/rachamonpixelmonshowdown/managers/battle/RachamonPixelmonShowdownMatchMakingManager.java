@@ -659,6 +659,8 @@ public class RachamonPixelmonShowdownMatchMakingManager {
      * League rules.
      *
      * @param leagueName the league name
+     * @param player     the player
+     * @throws Exception the exception
      */
     public void leagueRules(String leagueName, Player player) throws Exception {
 
@@ -827,8 +829,24 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                 .getGeneralLanguageBattle()
                 .getPlayerEnterQueue()
                 .replaceAll("\\{league}", leagueName));
+
+        Sponge.getServer().getOnlinePlayers().forEach(p -> {
+            ChatUtil.sendMessage(p, RachamonPixelmonShowdown
+                    .getInstance()
+                    .getLanguage()
+                    .getGeneralLanguageBattle()
+                    .getPlayerEnterQueueAnnouncement()
+                    .replaceAll("\\{league}", leagueName)
+                    .replaceAll("\\{player}", p.getName()));
+        });
     }
 
+    /**
+     * Ask for draw.
+     *
+     * @param player the player
+     * @throws Exception the exception
+     */
     public void askForDraw(Player player) throws Exception {
 
         Optional<Player> opponent = this.getOpponent(player);
@@ -849,6 +867,12 @@ public class RachamonPixelmonShowdownMatchMakingManager {
 
     }
 
+    /**
+     * Accepted draw.
+     *
+     * @param player the player
+     * @throws Exception the exception
+     */
     public void acceptedDraw(Player player) throws Exception {
         if (!RachamonPixelmonShowdownMatchMakingManager.promptQueue.contains(player.getUniqueId())) {
             return;
@@ -886,6 +910,12 @@ public class RachamonPixelmonShowdownMatchMakingManager {
         ChatUtil.sendMessage(opponent.get(), language.getSuccessfullyDraw());
     }
 
+    /**
+     * Denied draw.
+     *
+     * @param player the player
+     * @throws Exception the exception
+     */
     public void deniedDraw(Player player) throws Exception {
         if (!RachamonPixelmonShowdownMatchMakingManager.promptQueue.contains(player.getUniqueId())) {
             return;

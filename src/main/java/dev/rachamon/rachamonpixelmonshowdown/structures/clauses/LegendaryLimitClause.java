@@ -9,10 +9,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * The type Legendary limit clause.
+ */
 public class LegendaryLimitClause extends BattleClause {
 
     private int amount = 6;
 
+    /**
+     * Instantiates a new Legendary limit clause.
+     *
+     * @param id     the id
+     * @param amount the amount
+     */
     public LegendaryLimitClause(String id, int amount) {
         super(id);
         this.amount = amount;

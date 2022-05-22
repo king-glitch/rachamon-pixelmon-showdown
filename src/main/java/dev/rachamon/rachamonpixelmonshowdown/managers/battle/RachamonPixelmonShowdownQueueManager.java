@@ -122,6 +122,7 @@ public class RachamonPixelmonShowdownQueueManager {
      *
      * @param uuid the uuid
      * @return the player in match
+     * @throws Exception the exception
      */
     public QueueService getPlayerInMatch(UUID uuid) throws Exception {
         QueueService queueService = this.queue

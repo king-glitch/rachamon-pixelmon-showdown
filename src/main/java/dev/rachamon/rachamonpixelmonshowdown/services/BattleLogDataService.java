@@ -7,8 +7,20 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.UUID;
 
+/**
+ * The type Battle log data service.
+ */
 public class BattleLogDataService {
 
+    /**
+     * Add log.
+     *
+     * @param winner      the winner
+     * @param loser       the loser
+     * @param winnerPoint the winner point
+     * @param loserPoint  the loser point
+     * @param leagueName  the league name
+     */
     public static void addLog(UUID winner, UUID loser, int winnerPoint, int loserPoint, String leagueName) {
         RachamonPixelmonShowdown.getInstance().getDatabaseConnector().connect(connection -> {
             String SQL = "INSERT INTO showdown_log (winner_uuid, loser_uuid, winner_point, loser_point, league_type) VALUES (?,?,?,?,?)";
@@ -26,6 +38,9 @@ public class BattleLogDataService {
         });
     }
 
+    /**
+     * Initialize.
+     */
     public static void initialize() {
         String autoIncrement = "";
 

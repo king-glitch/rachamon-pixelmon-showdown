@@ -95,20 +95,46 @@ public class BattleLeagueConfig {
         @Setting(value = "ability-clause", comment = "The particular abilities you want it banned.")
         protected List<String> abilityClause = new ArrayList<>();
 
+        /**
+         * The Monotype clause.
+         */
         @Nullable
         @Setting(value = "monotype-clause", comment = "The particular type you want it banned.")
         protected String monotypeClause = null;
 
+        /**
+         * The Legendary limit clause.
+         */
         @Setting(value = "legendary-limit-clause", comment = "Limit the amount of legendary.")
         protected int legendaryLimitClause = 6;
 
+        /**
+         * The Allow duplicate item clause.
+         */
         @Setting(value = "allow-duplicate-item-clause", comment = "Allow same item in the party.")
         protected boolean allowDuplicateItemClause = false;
 
+        /**
+         * The Allow duplicate pokemon clause.
+         */
         @Setting(value = "allow-duplicate-pokemon-clause", comment = "Allow same pokemon in the party.")
         protected boolean allowDuplicatePokemonClause = false;
 
 
+        /**
+         * Instantiates a new League.
+         *
+         * @param battleRule                  the battle rule
+         * @param complexClaus                the complex claus
+         * @param pokemonClaus                the pokemon claus
+         * @param moveClaus                   the move claus
+         * @param heldItemClause              the held item clause
+         * @param abilities                   the abilities
+         * @param monotypeClause              the monotype clause
+         * @param legendaryLimitClause        the legendary limit clause
+         * @param allowDuplicateItemClause    the allow duplicate item clause
+         * @param allowDuplicatePokemonClause the allow duplicate pokemon clause
+         */
         public League(BattleRule battleRule, List<ComplexClaus> complexClaus, List<String> pokemonClaus, List<String> moveClaus, List<String> heldItemClause, List<String> abilities, @Nullable String monotypeClause, int legendaryLimitClause, boolean allowDuplicateItemClause, boolean allowDuplicatePokemonClause) {
             this.battleRule = battleRule;
             this.complexClaus = complexClaus;
@@ -176,19 +202,39 @@ public class BattleLeagueConfig {
             return this.abilityClause;
         }
 
+        /**
+         * Gets monotype clause.
+         *
+         * @return the monotype clause
+         */
         @Nullable
         public String getMonotypeClause() {
             return monotypeClause;
         }
 
+        /**
+         * Gets legendary limit clause.
+         *
+         * @return the legendary limit clause
+         */
         public int getLegendaryLimitClause() {
             return legendaryLimitClause;
         }
 
+        /**
+         * Is allow duplicate item clause boolean.
+         *
+         * @return the boolean
+         */
         public boolean isAllowDuplicateItemClause() {
             return allowDuplicateItemClause;
         }
 
+        /**
+         * Is allow duplicate pokemon clause boolean.
+         *
+         * @return the boolean
+         */
         public boolean isAllowDuplicatePokemonClause() {
             return allowDuplicatePokemonClause;
         }

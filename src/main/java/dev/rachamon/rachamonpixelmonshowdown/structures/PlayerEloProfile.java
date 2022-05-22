@@ -123,6 +123,11 @@ public class PlayerEloProfile {
         this.elo = elo;
     }
 
+    /**
+     * Gets win rate.
+     *
+     * @return the win rate
+     */
     public double getWinRate() {
         return Math.round(this.getWin() * 100.0 / (this.getWin() + this.getLose()));
     }

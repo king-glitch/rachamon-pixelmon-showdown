@@ -20,10 +20,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
-import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
-import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.game.state.*;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -163,6 +160,18 @@ public class RachamonPixelmonShowdown extends RachamonSpongePluginProvider imple
     public void onPostInitialize(GamePostInitializationEvent event) {
         RachamonPixelmonShowdown.getInstance().getLogger().info("On Post Initialize RachamonPixelmonShowdown");
         RachamonPixelmonShowdown.getInstance().getPluginManager().postInitialize();
+    }
+
+    /**
+     * On stop.
+     *
+     * @param event the event
+     */
+    @Listener
+    public void onStop(GameStoppingServerEvent event) {
+        if (!this.isInitialized()) return;
+        RachamonPixelmonShowdown.getInstance().getLogger().info("On stop RachamonPixelmonShowdown...");
+        this.getDatabaseConnector().closeConnection();
     }
 
     /**

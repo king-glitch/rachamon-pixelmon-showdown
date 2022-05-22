@@ -25,43 +25,82 @@ public class LanguageConfig {
         @Setting(value = "prefix", comment = "Prefix for chat message")
         protected String prefix = "&8[&c&lPixelmonShowdown&8]&7 ";
 
+        /**
+         * The Hover text.
+         */
         @Setting(value = "hover-text", comment = "hover text display")
         protected String hoverText = "&8[&a&lHOVER&8]&r";
 
+        /**
+         * The Banned header.
+         */
         @Setting(value = "banned-header", comment = "banned title")
         protected String bannedHeader = "&4&lBanned&7";
 
+        /**
+         * The Yes text.
+         */
         @Setting(value = "yes-text", comment = "yes text")
         protected String yesText = "&a&lYes&7";
 
+        /**
+         * The No text.
+         */
         @Setting(value = "no-text", comment = "no text")
         protected String noText = "&c&lNo&7";
 
+        /**
+         * The Team double text.
+         */
         @Setting(value = "team-double-text", comment = "team double text")
         protected String teamDoubleText = "&5&lDouble&7";
 
+        /**
+         * The Team single.
+         */
         @Setting(value = "team-single-text", comment = "team single text")
         protected String teamSingle = "&6&lSingle&7";
 
+        /**
+         * The Team double error.
+         */
         @Setting(value = "team-double-error", comment = "error when player has only one pokemon when battle type is double.")
         protected String teamDoubleError = "&cThis is double team, please put more than one pokemon in your party.";
 
 
+        /**
+         * The Not in battle.
+         */
         @Setting(value = "not-in-battle", comment = "error when no in a battle")
         protected String notInBattle = "&cYou or your opponent is not in a battle.";
 
+        /**
+         * The Successfully draw.
+         */
         @Setting(value = "successfully-draw", comment = "draw successfully message")
         protected String successfullyDraw = "&aYou have successfully draw with your opponent. no point will be lose.";
 
+        /**
+         * The Player ask for draw.
+         */
         @Setting(value = "player-ask-for-draw", comment = "message when player ask for a draw")
         protected String playerAskForDraw = "&7You have request a draw to an opponent.";
 
+        /**
+         * The Opponent ask for draw.
+         */
         @Setting(value = "opponent-ask-for-draw", comment = "message when player has ask an opponent for a draw")
         protected String opponentAskForDraw = "&7Your opponent has asked you for a draw, would you like to accept?";
 
+        /**
+         * The Opponent decline.
+         */
         @Setting(comment = "when opponent decline draw", value = "opponent-decline")
         protected String opponentDecline = "&cYour opponent has decline";
 
+        /**
+         * The You decline.
+         */
         @Setting(comment = "when you decline draw", value = "opponent-decline")
         protected String youDecline = "&7You have declined your opponent proposal";
 
@@ -149,8 +188,20 @@ public class LanguageConfig {
         @Setting(value = "player-enter-queue", comment = "when player enter the queue")
         protected String playerEnterQueue = "&aYou have entered league {league} queue.";
 
+        /**
+         * The Player enter queue announcement.
+         */
+        @Setting(value = "player-enter-queue-announcement", comment = "when player enter the queue announcement")
+        protected String playerEnterQueueAnnouncement = "&7Player &a&l{player}&7 has entered &a&l{league}&7 League. You can join by type &2/showdown q {league} enter&7.";
+
+        /**
+         * The Invalid team validated.
+         */
         @Setting(value = "invalid-team-validated", comment = "player team is invalid")
         protected String invalidTeamValidated = "&cYour team &4&l{validate}&c does not valid. please use correct team format.";
+        /**
+         * The Invalid team size.
+         */
         @Setting(value = "invalid-team-size", comment = "player invalid team size")
         protected String invalidTeamSize = "&cYour team size is too big. allowed &4&l{allowed}&c pokemons";
 
@@ -184,6 +235,9 @@ public class LanguageConfig {
         @Setting(value = "league-stats-value", comment = "stats value info")
         protected List<String> leagueStatsValue = Arrays.asList("", "&2&nLeague&r &8-> &a{league-name}", "&2&nElo&r &8-> &a{elo}", "&2&nWin Rate&r &8-> &a{win-rate} &6%", "&2&nWins&r &8-> &a{wins}", "&2&nLoses&r &8-> &a{loses}", "");
 
+        /**
+         * The League battle rules.
+         */
         @Setting(value = "league-battle-rules", comment = "battle rules value info")
         protected List<String> leagueBattleRules = Arrays.asList(
                 "",
@@ -380,69 +434,158 @@ public class LanguageConfig {
             return leagueStatsValue;
         }
 
+        /**
+         * Gets league battle rules.
+         *
+         * @return the league battle rules
+         */
         public List<String> getLeagueBattleRules() {
             return leagueBattleRules;
         }
 
+        /**
+         * Gets hover text.
+         *
+         * @return the hover text
+         */
         public String getHoverText() {
             return hoverText;
         }
 
+        /**
+         * Gets banned header.
+         *
+         * @return the banned header
+         */
         public String getBannedHeader() {
             return bannedHeader;
         }
 
+        /**
+         * Gets yes text.
+         *
+         * @return the yes text
+         */
         public String getYesText() {
             return yesText;
         }
 
+        /**
+         * Gets no text.
+         *
+         * @return the no text
+         */
         public String getNoText() {
             return noText;
         }
 
+        /**
+         * Gets team double text.
+         *
+         * @return the team double text
+         */
         public String getTeamDoubleText() {
             return teamDoubleText;
         }
 
+        /**
+         * Gets team single.
+         *
+         * @return the team single
+         */
         public String getTeamSingle() {
             return teamSingle;
         }
 
+        /**
+         * Gets team double error.
+         *
+         * @return the team double error
+         */
         public String getTeamDoubleError() {
             return teamDoubleError;
         }
 
 
+        /**
+         * Gets not in battle.
+         *
+         * @return the not in battle
+         */
         public String getNotInBattle() {
             return notInBattle;
         }
 
+        /**
+         * Gets successfully draw.
+         *
+         * @return the successfully draw
+         */
         public String getSuccessfullyDraw() {
             return successfullyDraw;
         }
 
+        /**
+         * Gets opponent decline.
+         *
+         * @return the opponent decline
+         */
         public String getOpponentDecline() {
             return opponentDecline;
         }
 
+        /**
+         * Gets you decline.
+         *
+         * @return the you decline
+         */
         public String getYouDecline() {
             return youDecline;
         }
 
+        /**
+         * Gets player ask for draw.
+         *
+         * @return the player ask for draw
+         */
         public String getPlayerAskForDraw() {
             return playerAskForDraw;
         }
 
+        /**
+         * Gets opponent ask for draw.
+         *
+         * @return the opponent ask for draw
+         */
         public String getOpponentAskForDraw() {
             return opponentAskForDraw;
         }
 
+        /**
+         * Gets invalid team validated.
+         *
+         * @return the invalid team validated
+         */
         public String getInvalidTeamValidated() {
             return invalidTeamValidated;
         }
 
+        /**
+         * Gets invalid team size.
+         *
+         * @return the invalid team size
+         */
         public String getInvalidTeamSize() {
             return invalidTeamSize;
+        }
+
+        /**
+         * Gets player enter queue announcement.
+         *
+         * @return the player enter queue announcement
+         */
+        public String getPlayerEnterQueueAnnouncement() {
+            return playerEnterQueueAnnouncement;
         }
     }
 

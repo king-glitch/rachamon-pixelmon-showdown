@@ -7,7 +7,15 @@ import com.pixelmonmod.pixelmon.enums.EnumSpecies;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The type Duplicate pokemon clause.
+ */
 public class DuplicatePokemonClause extends BattleClause {
+    /**
+     * Instantiates a new Duplicate pokemon clause.
+     *
+     * @param id the id
+     */
     public DuplicatePokemonClause(String id) {
         super(id);
         this.setDescription("Duplicate pokemon are not allowed");

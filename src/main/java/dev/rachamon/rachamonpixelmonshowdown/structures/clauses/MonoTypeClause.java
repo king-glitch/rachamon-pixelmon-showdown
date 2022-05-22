@@ -7,10 +7,22 @@ import com.pixelmonmod.pixelmon.enums.EnumType;
 import javax.annotation.Nullable;
 import java.util.List;
 
+/**
+ * The type Mono type clause.
+ */
 public class MonoTypeClause extends BattleClause {
 
+    /**
+     * The Type.
+     */
     EnumType type = null;
 
+    /**
+     * Instantiates a new Mono type clause.
+     *
+     * @param id   the id
+     * @param type the type
+     */
     public MonoTypeClause(String id, @Nullable EnumType type) {
         super(id);
         this.type = type;

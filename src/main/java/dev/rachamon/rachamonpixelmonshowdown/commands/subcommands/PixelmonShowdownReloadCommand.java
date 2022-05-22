@@ -10,6 +10,9 @@ import org.spongepowered.api.command.args.CommandElement;
 
 import javax.annotation.Nonnull;
 
+/**
+ * The type Pixelmon showdown reload command.
+ */
 @ICommandDescription("reload config, languages, leagues")
 @ICommandAliases({"reload"})
 @ICommandPermission("rachamonpixelmonshowdown.command.admin.reload")

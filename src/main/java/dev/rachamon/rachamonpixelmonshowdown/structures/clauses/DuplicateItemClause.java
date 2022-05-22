@@ -7,7 +7,15 @@ import net.minecraft.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The type Duplicate item clause.
+ */
 public class DuplicateItemClause extends BattleClause {
+    /**
+     * Instantiates a new Duplicate item clause.
+     *
+     * @param id the id
+     */
     public DuplicateItemClause(String id) {
         super(id);
         this.setDescription("Duplicate item are not allowed");
