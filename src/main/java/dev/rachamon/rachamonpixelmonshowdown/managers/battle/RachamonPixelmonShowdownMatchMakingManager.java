@@ -837,7 +837,7 @@ public class RachamonPixelmonShowdownMatchMakingManager {
                     .getGeneralLanguageBattle()
                     .getPlayerEnterQueueAnnouncement()
                     .replaceAll("\\{league}", leagueName)
-                    .replaceAll("\\{player}", p.getName()));
+                    .replaceAll("\\{player}", player.getName()));
         });
     }
 
